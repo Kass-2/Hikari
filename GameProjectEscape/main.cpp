@@ -2,10 +2,36 @@
 
 #include <SFML/Graphics.hpp>
 
-/* Fonction pour gérer l'animation de marche du personnage */
-void walking(bool& walk, sf::Clock& clock, float frameTime, sf::IntRect& rectSource, sf::Sprite& player, int col) 
+// Enumération pour les différents états du joueur
+enum class PlayerState
 {
-	if (!walk) 
+	IDLE,
+	WALKING,
+	RUNNING,
+	ATTACKING,
+};
+
+// Enumération pour les différentes directions du joueur
+enum class Direction
+{
+	UP,
+	DOWN,
+	LEFT,
+	RIGHT
+};
+
+struct boolPlayerState
+{
+	bool walk = false;
+	bool idle = false;
+	bool run = false;
+	bool attack = false;
+};
+
+/* Fonction pour gérer l'animation de marche du personnage */
+void walkAnimation(bool& walk, sf::Clock& clock, float frameTime, sf::IntRect& rectSource, sf::Sprite& player, int col) 
+{
+	if (!walk)
 	{
 		return;
 	}
@@ -32,13 +58,13 @@ void walking(bool& walk, sf::Clock& clock, float frameTime, sf::IntRect& rectSou
 }
 
 /* Fonctions pour gérer l'animation d'inactivité du personnage */
-void idle(bool& notMoving, sf::Clock& clock, float frameTime, sf::IntRect& rectSource, sf::Sprite& player, int col)
+void idleAnimation(bool& idle, sf::Clock& clock, float frameTime, sf::IntRect& rectSource, sf::Sprite& player, int col)
 {
-	if (!notMoving)
+	if (!idle)
 	{
 		return;
 	}
-	if (notMoving)
+	if (idle)
 	{
 		std::cout << "Idle..." << std::endl;
 		if (clock.getElapsedTime().asSeconds() >= frameTime)
@@ -60,7 +86,7 @@ void idle(bool& notMoving, sf::Clock& clock, float frameTime, sf::IntRect& rectS
 	}
 }
 
-void running() 
+void running()
 {
 	// Code pour gérer la course du personnage
 }
@@ -68,17 +94,6 @@ void running()
 void attacking() 
 {
 	// Code pour gérer l'attaque du personnage
-}
-
-void jumping() 
-{
-	// Code pour gérer le saut du personnage
-}
-
-void animation() 
-{
-	// Code pour gérer l'animation du personnage
-
 }
 
 int main()
@@ -125,14 +140,22 @@ int main()
 
 	////////////////////////////////////////////////
 
-	float speed = 1.f; // Vitesse de déplacement du joueur
+	////////////////////////////////////////////////
+	// Variables pour gérer le déplacement du joueur
+	// et l'animation du personnage
+	///////////////////////////////////////////////
 
-	bool walk = false; // Variable pour indiquer si le joueur est en train de marcher ou non
-	bool notMoving = true; // Variable pour indiquer si le joueur est en train de rester immobile ou non
+	float speed = 0.5f; // Vitesse de déplacement du joueur
+
+	Direction direction = Direction::RIGHT; // Variable pour stocker la direction actuelle du joueur
+	PlayerState state = PlayerState::IDLE;	// Variable pour stocker l'état actuel du joueur
+
+	boolPlayerState boolState;				// Variable booléenne pour stocker les différents états du joueur
+
+	//////////////////////////////////////////////
 
 	// Horloge pour gérer l'animation du personnage ou autre chose liée au temps
 	sf::Clock clock;
-	float frameTime = 0.5f;
 
 	// Game loop
     while (window.isOpen())
@@ -144,39 +167,60 @@ int main()
         }
 
 		// Déplacement du joueur avec les touches fléchées
-		frameTime = 0.2f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
 		{
-			// Pour que le personnage regarde vers la gauche
-			player.setScale({ -1.f, 1.f });
-
-			player.move({ -speed, 0.f }); walk = true; notMoving = false;
-			walking(walk, clock, frameTime, rect, player, 2);
+			player.move({ -speed, 0.f }); boolState.walk = true; boolState.idle = false;
+			direction = Direction::LEFT;
 		}
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
 		{
-			// Pour que le personnage regarde vers la droite
-			player.setScale({ 1.f, 1.f });
-
-			player.move({ speed, 0.f }); walk = true; notMoving = false;
-			walking(walk, clock, frameTime, rect, player, 2);
+			player.move({ speed, 0.f }); boolState.walk = true; boolState.idle = false;
+			direction = Direction::RIGHT;
 		}
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
 		{
-			player.move({ 0.f, -speed }); walk = true; notMoving = false;
-			walking(walk, clock, frameTime, rect, player, 2);
+			player.move({ 0.f, -speed }); boolState.walk = true; boolState.idle = false;
 		}
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
 		{
-			player.move({ 0.f, speed }); walk = true; notMoving = false;
-			walking(walk, clock, frameTime, rect, player, 2);
+			player.move({ 0.f, speed }); boolState.walk = true; boolState.idle = false;
 		}
 
-		frameTime = 0.3f;
-		idle(notMoving, clock, frameTime, rect, player, 0);
+		if (direction == Direction::RIGHT)
+			player.setScale({ 1.f, 1.f }); // Pour que le personnage regarde vers la droite
+		else
+			player.setScale({ -1.f, 1.f }); // Pour que le personnage regarde vers la gauche
 
-		walk = false;
-		notMoving = true;
+		if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) &&
+			!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) &&
+			!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) &&
+			!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+		{
+			boolState.walk = false; boolState.idle = true;
+		}
+
+		if (boolState.walk) state = PlayerState::WALKING;
+		else state = PlayerState::IDLE;
+
+		switch (state)
+		{
+		case PlayerState::IDLE:
+			idleAnimation(boolState.idle, clock, 0.3f, rect, player, 0);
+			break;
+		case PlayerState::WALKING:
+			walkAnimation(boolState.walk, clock, 0.3f, rect, player, 2);
+			break;
+		case PlayerState::RUNNING:
+			
+			break;
+		case PlayerState::ATTACKING:
+			break;
+		default:
+			break;
+		}
+
+		/*walk = false;
+		boolState.idle = true;*/
 
         window.clear(sf::Color(50,50,50));
         window.draw(player);
