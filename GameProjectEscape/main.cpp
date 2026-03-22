@@ -5,30 +5,29 @@
 int main()
 {
 	// Create the main window
-	sf::RenderWindow window(sf::VideoMode(800, 600), "Game Project Escape Prototype");
+    sf::RenderWindow window(sf::VideoMode({ 800, 600 }), "Game Project Escape Prototype");
 	window.setFramerateLimit(60);
 
 	// Creation of our player
-	sf::RectangleShape player(sf::Vector2f(40.f, 40.f));
+	sf::RectangleShape player({40.f, 40.f});
 	player.setFillColor(sf::Color::Green);
-	player.setPosition(sf::Vector2(400.f, 300.f));
+    player.setPosition({ 400.f, 300.f });
 
 	float playerSpeed = 5.f; // Speed of the player
 
     // Main game loop
     while (window.isOpen())
     {
-        sf::Event event;
-        while (window.pollEvent(event))
+        while (auto event = window.pollEvent())
         {
-            if (event.type == sf::Event::Closed)
+            if (event->is<sf::Event::Closed>())
                 window.close();
         }
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) player.move(sf::Vector2(-playerSpeed, 0.f));
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) player.move(sf::Vector2(playerSpeed, 0.f));
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) player.move(sf::Vector2(0.f, -playerSpeed));
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) player.move(sf::Vector2(0.f, playerSpeed));
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) player.move({-playerSpeed, 0.f});
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) player.move({playerSpeed, 0.f});
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) player.move({0.f, -playerSpeed});
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) player.move({0.f, playerSpeed});
 
         window.clear();
         window.draw(player);
