@@ -49,36 +49,24 @@ void keyboardInput(boolPlayerState& boolState, Direction& direction, sf::Sprite&
 {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
 	{
-		if (boolState.run)
-			speed = 0.5f; // Vitesse de course
-
 		player.move({ -speed, 0.f });
 		boolState.walk = true; boolState.idle = false;
 		direction = Direction::LEFT;
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
 	{
-		if (boolState.run)
-			speed = 0.5f; // Vitesse de course
-
 		player.move({ speed, 0.f });
 		boolState.walk = true; boolState.idle = false;
 		direction = Direction::RIGHT;
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
 	{
-		if (boolState.run)
-			speed = 0.5f; // Vitesse de course
-
 		player.move({ 0.f, -speed });
 		boolState.walk = true; boolState.idle = false;
 		direction = Direction::UP;
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
 	{
-		if (boolState.run)
-			speed = 0.5f; // Vitesse de course
-
 		player.move({ 0.f, speed });
 		boolState.walk = true; boolState.idle = false;
 		direction = Direction::DOWN;
@@ -86,11 +74,13 @@ void keyboardInput(boolPlayerState& boolState, Direction& direction, sf::Sprite&
 
 	if (boolState.walk && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift))
 	{
+		speed = 0.7f;
 		boolState.run = true;
 	}
 	else
 	{
-		speed = 0.3f; boolState.run = false;
+		speed = 0.3f; 
+		boolState.run = false;
 	}
 
 	if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) &&
@@ -197,6 +187,8 @@ int main()
     sf::RenderWindow window(sf::VideoMode({ 800, 600 }), "Game Project Escape Prototype");
 	window.setFramerateLimit(60);
 
+
+
     //////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////
@@ -232,6 +224,8 @@ int main()
 	player.setScale({ 1.0f, 1.0f });        // Modifier la taille du sprite du joueur
 
 	////////////////////////////////////////////////
+
+
 
 	////////////////////////////////////////////////
 	// Variables pour gérer le déplacement du joueur
