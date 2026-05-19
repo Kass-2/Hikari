@@ -50,9 +50,25 @@ Player::Player(sf::Texture &texture, sf::Sprite &sprite, const std::string& tf)
 }
 
 //===============================
+// Initialisation des informations du joueur (nom, santé, puissance d'attaque, défense, vitesse, etc.)
+//===============================
+void Player::initialState(std::string characterName) {
+	player.name = characterName;
+	player.health = 100;
+	player.maxHealth = 100;
+	player.attackPower = 10;
+	player.defense = 5;
+	player.speed = 5;
+}
+
+//===============================
 // Gestion des entrées clavier pour déplacer le joueur et changer son état
 //===============================
 void Player::handleInput(sf::Sprite& sprite) {
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::K)) boolState.dead = false; // Si le joueur est vivant, on réinitialise l'état de mort
+
+	if (boolState.dead) return; // Si le joueur est endommagé ou mort, on ne gère pas les entrées clavier
+
 	sf::Vector2f movement = { 0.f, 0.f };
 
 	bool left = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) ||
@@ -100,6 +116,9 @@ void Player::handleInput(sf::Sprite& sprite) {
 	speed = boolState.run ? 0.7f : 0.3f;
 
 	sprite.move(movement * speed);
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::J)) boolState.damaged = true;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::L)) boolState.dead = true;
 }
 
 //===============================
@@ -128,7 +147,9 @@ void Player::update(float dt, const sf::RenderWindow& window, sf::Sprite& sprite
 		sprite.setScale({ -1.f, 1.f }); // Pour que le personnage regarde vers la gauche
 
 	// Mise à jour de l'état du joueur en fonction des booléens
-	if (boolState.attack) state = PlayerState::ATTACKING;
+	if (boolState.dead) state = PlayerState::DEAD;
+	else if (boolState.damaged) state = PlayerState::DAMAGED;
+	else if (boolState.attack) state = PlayerState::ATTACKING;
 	else if (boolState.run) state = PlayerState::RUNNING;
 	else if (boolState.walk) state = PlayerState::WALKING;
 	else state = PlayerState::IDLE;
@@ -149,7 +170,9 @@ void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 			state == PlayerState::IDLE ? 0 :
 			state == PlayerState::WALKING ? 2 * 32 :
 			state == PlayerState::RUNNING ? 3 * 32 :
-			state == PlayerState::ATTACKING ? 8 * 32 : 0);
+			state == PlayerState::ATTACKING ? 8 * 32 :
+			state == PlayerState::DAMAGED ? 6 * 32 :
+			state == PlayerState::DEAD ? 7 * 32 : 0);
 
 		sprite.setTextureRect(rectSource);
 
@@ -159,17 +182,32 @@ void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 
 	// Déterminer le temps entre les frames et le nombre de frames en fonction de l'état du joueur
 	float frameTime = (state == PlayerState::RUNNING) ? 0.09f :
-					  (state == PlayerState::ATTACKING) ? 0.09f : 0.3f;
+					  (state == PlayerState::ATTACKING) ? 0.09f :
+					  (state == PlayerState::DAMAGED) ? 0.1f :
+					  (state == PlayerState::DEAD) ? 0.1f : 0.3f;
 	int maxFrames = (state == PlayerState::IDLE) ? 2 :
 					(state == PlayerState::WALKING) ? 4 :
 					(state == PlayerState::RUNNING) ? 8 : 
-					(state == PlayerState::ATTACKING) ? 8 : 1;
-
+					(state == PlayerState::ATTACKING) ? 8 :
+					(state == PlayerState::DAMAGED) ? 3 :
+					(state == PlayerState::DEAD) ? 8 : 1;
 	// Mettre à jour l'animation du joueur en fonction du temps écoulé
 	if (animationClock.getElapsedTime().asSeconds() >= frameTime) {
 		rectSource.position.x += 32;
 		if (rectSource.position.x >= maxFrames * 32) {
-			rectSource.position.x = 0;
+			if (state == PlayerState::DEAD)
+			{
+				rectSource.position.x = (maxFrames - 1) * 32;
+			}
+			else if (state == PlayerState::DAMAGED)
+			{
+				rectSource.position.x = 0;
+				boolState.damaged = false; // Réinitialiser l'état de dommage après l'animation
+			}
+			else
+			{
+				rectSource.position.x = 0;
+			}
 		}
 		sprite.setTextureRect(rectSource);
 		animationClock.restart();

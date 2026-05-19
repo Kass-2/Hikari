@@ -20,7 +20,9 @@ int main()
 	sf::Texture texture;
 	sf::Sprite sprite(texture);
 
-	Player player(texture, sprite, "player.png");
+	Player playerCharacter(texture, sprite, "player.png");
+
+	playerCharacter.initialState("Sid");
 
 	//===============================
 	// Loop principal du jeu
@@ -33,10 +35,10 @@ int main()
                 window.close();
         }
 
-		player.update(1.f / 60.f, window, sprite);
+		playerCharacter.update(1.f / 60.f, window, sprite);
 
         window.clear(sf::Color(50,50,50));
-		player.draw(window, sprite);
+		playerCharacter.draw(window, sprite);
         window.display();
     }
 }

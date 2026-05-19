@@ -30,10 +30,22 @@
 // Structure pour stocker les différents états du joueur sous forme de booléens
 struct boolPlayerState
 {
+	bool damaged = false;
+	bool dead = false;
 	bool walk = false;
 	bool idle = false;
 	bool run = false;
 	bool attack = false;
+};
+
+struct PlayerInfo
+{
+	std::string name;
+	int health;
+	int maxHealth;
+	int attackPower;
+	int defense;
+	int speed;
 };
 
 // Enumération pour les différentes directions du joueur
@@ -48,6 +60,8 @@ enum class Direction
 // Enumération pour les différents états du joueur
 enum class PlayerState
 {
+	DAMAGED,
+	DEAD,
 	IDLE,
 	WALKING,
 	RUNNING,
@@ -82,10 +96,12 @@ public:
 	Player(sf::Texture& texture, sf::Sprite& sprite, const std::string& textureFile);
 	void update(float dt, const sf::RenderWindow & window, sf::Sprite& sprite);
 	void draw(sf::RenderWindow & window, sf::Sprite& sprite);
+	void initialState(std::string);
 
 private:
 	void handleInput(sf::Sprite& sprite);
 	void updateAnimation(float deltaTime, sf::Sprite& sprite);
+	
 	
 	std::string textureFile;
 
@@ -96,6 +112,7 @@ private:
 	boolPlayerState boolState;
 	PlayerState state;
 	PlayerState previousState;
+	PlayerInfo player;
 
 	float speed;
 };
