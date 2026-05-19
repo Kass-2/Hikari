@@ -33,6 +33,8 @@ int main()
         {
             if (event->is<sf::Event::Closed>())
                 window.close();
+
+			playerCharacter.handleEvent(*event);
         }
 
 		playerCharacter.update(1.f / 60.f, window, sprite);

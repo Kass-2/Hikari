@@ -97,6 +97,7 @@ public:
 	void update(float dt, const sf::RenderWindow & window, sf::Sprite& sprite);
 	void draw(sf::RenderWindow & window, sf::Sprite& sprite);
 	void initialState(std::string);
+	void handleEvent(const sf::Event& event);
 
 private:
 	void handleInput(sf::Sprite& sprite);
@@ -113,6 +114,14 @@ private:
 	PlayerState state;
 	PlayerState previousState;
 	PlayerInfo player;
+
+	bool leftHeld = false;
+	bool rightHeld = false;
+	bool upHeld = false;
+	bool downHeld = false;
+
+	Direction lastHorizontal = Direction::RIGHT;
+	Direction lastVertical = Direction::DOWN;
 
 	float speed;
 };

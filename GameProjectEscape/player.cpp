@@ -71,36 +71,58 @@ void Player::handleInput(sf::Sprite& sprite) {
 
 	sf::Vector2f movement = { 0.f, 0.f };
 
-	bool left = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) ||
-		sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A);
-
-	bool right = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) ||
-		sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D);
-
-	bool up = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) ||
-		sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W);
-
-	bool down = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down) ||
-		sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S);
-
-	if (left && !right)
+	// Mémoriser les états des touches pour gérer les cas où les deux touches sont pressées en même temps
+	if (leftHeld && rightHeld)
+	{
+		if (lastHorizontal == Direction::LEFT)
+		{
+			movement.x = -1.f;
+			direction = Direction::LEFT;
+			sprite.setScale({ -1.f, 1.f }); // Pour que le personnage regarde vers la gauche
+		}
+		else
+		{
+			movement.x = 1.f;
+			direction = Direction::RIGHT;
+			sprite.setScale({ 1.f, 1.f });	// Pour que le personnage regarde vers la droite
+		}
+	}
+	else if (leftHeld)
 	{
 		movement.x = -1.f;
 		direction = Direction::LEFT;
+		sprite.setScale({ -1.f, 1.f }); // Pour que le personnage regarde vers la gauche
 	}
-	else if (right && !left)
+	else if (rightHeld)
 	{
 		movement.x = 1.f;
 		direction = Direction::RIGHT;
+		sprite.setScale({ 1.f, 1.f });	// Pour que le personnage regarde vers la droite
 	}
 
-	if (up && !down)
+	// Mémoriser la dernière direction horizontale pour gérer les cas où les deux touches sont pressées en même temps
+	if (upHeld && downHeld)
+	{
+		if (lastVertical == Direction::UP)
+		{
+			movement.y = -1.f;
+			direction = Direction::UP;
+		}
+		else
+		{
+			movement.y = 1.f;
+			direction = Direction::DOWN;
+		}
+	}
+	else if (upHeld)
 	{
 		movement.y = -1.f;
+		direction = Direction::UP;
 	}
-	else if (down && !up)
+	else if (downHeld)
 	{
 		movement.y = 1.f;
+		direction = Direction::DOWN;
 	}
 
 	bool moving = (movement.x != 0.f || movement.y != 0.f);
@@ -115,8 +137,19 @@ void Player::handleInput(sf::Sprite& sprite) {
 
 	speed = boolState.run ? 0.7f : 0.3f;
 
+	// Normaliser le vecteur de mouvement pour éviter que le personnage ne se déplace plus vite en diagonale
+	if (movement.x != 0.f || movement.y != 0.f)
+	{
+		float length = std::sqrt(
+			movement.x * movement.x +
+			movement.y * movement.y);
+
+		movement /= length;
+	}
+
 	sprite.move(movement * speed);
 
+	// Gestion des entrées clavier pour changer l'état du joueur (dommage, mort)
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::J)) boolState.damaged = true;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::L)) boolState.dead = true;
 }
@@ -141,10 +174,10 @@ void Player::update(float dt, const sf::RenderWindow& window, sf::Sprite& sprite
 
 	sprite.setPosition(pos);
 
-	if (direction == Direction::RIGHT)
-		sprite.setScale({ 1.f, 1.f });	// Pour que le personnage regarde vers la droite
-	else if (direction == Direction::LEFT)
-		sprite.setScale({ -1.f, 1.f }); // Pour que le personnage regarde vers la gauche
+	//if (lastHorizontal == Direction::RIGHT)
+	//	sprite.setScale({ 1.f, 1.f });	// Pour que le personnage regarde vers la droite
+	//else if (lastHorizontal == Direction::LEFT)
+	//	sprite.setScale({ -1.f, 1.f }); // Pour que le personnage regarde vers la gauche
 
 	// Mise à jour de l'état du joueur en fonction des booléens
 	if (boolState.dead) state = PlayerState::DEAD;
@@ -211,6 +244,68 @@ void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 		}
 		sprite.setTextureRect(rectSource);
 		animationClock.restart();
+	}
+}
+
+//===============================
+// Gestion des événements clavier pour mettre à jour les booléens correspondants aux touches pressées ou relâchées
+//===============================
+void Player::handleEvent(const sf::Event& event)
+{
+	if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
+	{
+		switch (keyPressed->code)
+		{
+		case sf::Keyboard::Key::A:
+		case sf::Keyboard::Key::Left:
+			leftHeld = true;
+			lastHorizontal = Direction::LEFT;
+			break;
+
+		case sf::Keyboard::Key::D:
+		case sf::Keyboard::Key::Right:
+			rightHeld = true;
+			lastHorizontal = Direction::RIGHT;
+			break;
+
+		case sf::Keyboard::Key::W:
+		case sf::Keyboard::Key::Up:
+			upHeld = true;
+			lastVertical = Direction::UP;
+			break;
+
+		case sf::Keyboard::Key::S:
+		case sf::Keyboard::Key::Down:
+			downHeld = true;
+			lastVertical = Direction::DOWN;
+			break;
+		}
+	}
+
+	if (const auto* keyReleased = event.getIf<sf::Event::KeyReleased>())
+	{
+		switch (keyReleased->code)
+		{
+		case sf::Keyboard::Key::A:
+		case sf::Keyboard::Key::Left:
+			leftHeld = false;
+			break;
+
+		case sf::Keyboard::Key::D:
+		case sf::Keyboard::Key::Right:
+			rightHeld = false;
+			break;
+
+		case sf::Keyboard::Key::W:
+		case sf::Keyboard::Key::Up:
+			upHeld = false;
+			break;
+
+		case sf::Keyboard::Key::S:
+		case sf::Keyboard::Key::Down:
+			downHeld = false;
+			break;
+		}
 	}
 }
 
