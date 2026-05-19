@@ -53,47 +53,53 @@ Player::Player(sf::Texture &texture, sf::Sprite &sprite, const std::string& tf)
 // Gestion des entrées clavier pour déplacer le joueur et changer son état
 //===============================
 void Player::handleInput(sf::Sprite& sprite) {
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
+	sf::Vector2f movement = { 0.f, 0.f };
+
+	bool left = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) ||
+		sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A);
+
+	bool right = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) ||
+		sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D);
+
+	bool up = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) ||
+		sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W);
+
+	bool down = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down) ||
+		sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S);
+
+	if (left && !right)
 	{
-		sprite.move({ -speed, 0.f });
-		boolState.walk = true; boolState.idle = false;
+		movement.x = -1.f;
 		direction = Direction::LEFT;
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+	else if (right && !left)
 	{
-		sprite.move({ speed, 0.f });
-		boolState.walk = true; boolState.idle = false;
+		movement.x = 1.f;
 		direction = Direction::RIGHT;
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+
+	if (up && !down)
 	{
-		sprite.move({ 0.f, -speed });
-		boolState.walk = true; boolState.idle = false;
-		direction = Direction::UP;
+		movement.y = -1.f;
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+	else if (down && !up)
 	{
-		sprite.move({ 0.f, speed });
-		boolState.walk = true; boolState.idle = false;
-		direction = Direction::DOWN;
+		movement.y = 1.f;
 	}
 
-	if (boolState.walk && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift))
-	{
-		speed = 0.7f; boolState.run = true;
-	}
-	else
-	{
-		speed = 0.3f; boolState.run = false;
-	}
+	bool moving = (movement.x != 0.f || movement.y != 0.f);
 
-	if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) &&
-		!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) &&
-		!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) &&
-		!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
-	{
-		boolState.walk = false; boolState.idle = true;
-	}
+	boolState.run = moving && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift);
+
+	boolState.attack = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
+
+	boolState.walk = moving && !boolState.run;
+
+	boolState.idle = !moving && !boolState.attack;
+
+	speed = boolState.run ? 0.7f : 0.3f;
+
+	sprite.move(movement * speed);
 }
 
 //===============================
@@ -122,7 +128,8 @@ void Player::update(float dt, const sf::RenderWindow& window, sf::Sprite& sprite
 		sprite.setScale({ -1.f, 1.f }); // Pour que le personnage regarde vers la gauche
 
 	// Mise à jour de l'état du joueur en fonction des booléens
-	if (boolState.run) state = PlayerState::RUNNING;
+	if (boolState.attack) state = PlayerState::ATTACKING;
+	else if (boolState.run) state = PlayerState::RUNNING;
 	else if (boolState.walk) state = PlayerState::WALKING;
 	else state = PlayerState::IDLE;
 
@@ -141,7 +148,8 @@ void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 		rectSource.position.y = (
 			state == PlayerState::IDLE ? 0 :
 			state == PlayerState::WALKING ? 2 * 32 :
-			state == PlayerState::RUNNING ? 3 * 32 : 0);
+			state == PlayerState::RUNNING ? 3 * 32 :
+			state == PlayerState::ATTACKING ? 8 * 32 : 0);
 
 		sprite.setTextureRect(rectSource);
 
@@ -150,10 +158,12 @@ void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 	}
 
 	// Déterminer le temps entre les frames et le nombre de frames en fonction de l'état du joueur
-	float frameTime = (state == PlayerState::RUNNING) ? 0.1f : 0.3f;
+	float frameTime = (state == PlayerState::RUNNING) ? 0.09f :
+					  (state == PlayerState::ATTACKING) ? 0.09f : 0.3f;
 	int maxFrames = (state == PlayerState::IDLE) ? 2 :
 					(state == PlayerState::WALKING) ? 4 :
-					(state == PlayerState::RUNNING) ? 8 : 1;
+					(state == PlayerState::RUNNING) ? 8 : 
+					(state == PlayerState::ATTACKING) ? 8 : 1;
 
 	// Mettre à jour l'animation du joueur en fonction du temps écoulé
 	if (animationClock.getElapsedTime().asSeconds() >= frameTime) {
