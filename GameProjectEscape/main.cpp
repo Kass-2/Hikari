@@ -1,11 +1,13 @@
+//===============================
+// Fichier : main.cpp
+// Description : Point d'entrée du jeu, création de la fenêtre, boucle principale du jeu
+// Auteur : Aboubacar Sanogo
+// Version : 1.0
+//===============================
+
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include "player.h"
-
-void attackingAnimation() 
-{
-	// Code pour gérer l'attaque du personnage
-}
 
 int main()
 {
