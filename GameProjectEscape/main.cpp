@@ -9,6 +9,7 @@
 #include <SFML/Graphics.hpp>
 #include "player.h"
 #include "tileMap.h"
+#include "mapData.h"
 
 //===============================
 // Constantes pour la taille des tuiles et les dimensions de la carte
@@ -43,14 +44,20 @@ int main()
 	//===============================
 	TileMap tileMap(MAP_WIDTH, MAP_HEIGHT);
 
-	int mapLayout[MAX_TILES] = { 0 };
+	int map[MAX_TILES] = { 0 };
+	int map_width = MAP_WIDTH;
+	int map_height = MAP_HEIGHT;
 
-	for (int i = 0; i < MAX_TILES; ++i) {
-		mapLayout[i] = 356;
-	};
+	std::vector<int> mapData;
+
+	// Charger les données de la carte à partir du fichier CSV
+	loadCSV("Assets/InitialMap.csv", mapData, map_width, map_height);
+
+	// Copier les données de la carte chargée dans le tableau 1D
+	loadMap(map, mapData, MAX_TILES);
 
 	// Charger la map avec ces nouvelles dimensions
-	if (!tileMap.load("Assets/Ground.png", sf::Vector2u(32, 32), mapLayout))
+	if (!tileMap.load("Assets/Tileset_Grass.png", sf::Vector2u(32, 32), map))
 	{
 		std::cerr << "Failed to load tile map!" << std::endl;
 		return -1;

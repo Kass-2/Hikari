@@ -1,7 +1,7 @@
 //====================================
 // Fichier : tileMap.cpp
 // Description : Implémentation de la classe TileMap pour gérer les cartes de tuiles
-// Auteur : Google AI
+// Auteur : Aboubacar Sanogo
 // Version : 1.0
 //====================================
 

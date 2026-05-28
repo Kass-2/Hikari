@@ -71,26 +71,38 @@ void Player::handleInput(sf::Sprite& sprite) {
 		{
 			movement.x = -1.f;
 			direction = Direction::LEFT;
-			sprite.setScale({ -1.f, 1.f }); // Pour que le personnage regarde vers la gauche
+			if (!attacking)
+			{
+				sprite.setScale({ -1.f, 1.f }); // Pour que le personnage regarde vers la gauche
+			}
 		}
 		else
 		{
 			movement.x = 1.f;
 			direction = Direction::RIGHT;
-			sprite.setScale({ 1.f, 1.f });	// Pour que le personnage regarde vers la droite
+			if (!attacking)
+			{
+				sprite.setScale({ 1.f, 1.f });	// Pour que le personnage regarde vers la droite
+			}
 		}
 	}
 	else if (leftHeld)
 	{
 		movement.x = -1.f;
 		direction = Direction::LEFT;
-		sprite.setScale({ -1.f, 1.f }); // Pour que le personnage regarde vers la gauche
+		if (!attacking)
+		{
+			sprite.setScale({ -1.f, 1.f }); // Pour que le personnage regarde vers la gauche
+		}
 	}
 	else if (rightHeld)
 	{
 		movement.x = 1.f;
 		direction = Direction::RIGHT;
-		sprite.setScale({ 1.f, 1.f });	// Pour que le personnage regarde vers la droite
+		if (!attacking)
+		{
+			sprite.setScale({ 1.f, 1.f });	// Pour que le personnage regarde vers la droite
+		}
 	}
 
 	// Mémoriser la dernière direction horizontale pour gérer les cas où les deux touches sont pressées en même temps
@@ -204,7 +216,8 @@ void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 	float frameTime = 
 		(state == PlayerState::RUNNING) ? 0.07f :
 		(state == PlayerState::WALKING) ? 0.1f :
-		(state == PlayerState::ATTACKING) ? 0.04f :
+		(state == PlayerState::ATTACKING) ? 0.03f :
+		(state == PlayerState::IDLE) ? 0.2f :
 		(state == PlayerState::DAMAGED) ? 0.1f :
 		(state == PlayerState::DEAD) ? 0.1f : 0.3f;
 	int maxFrames = 

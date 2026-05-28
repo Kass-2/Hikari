@@ -1,7 +1,7 @@
 //====================================
 // Fichier : tileMap.cpp
 // Description : Implémentation de la classe TileMap pour gérer les cartes de tuiles
-// Auteur : Google AI
+// Auteur : Aboubacar Sanogo
 // Version : 1.0
 //====================================
 
@@ -13,7 +13,8 @@ TileMap::TileMap(unsigned int mapWidth, unsigned int mapHeight)
 
 }
 
-bool TileMap::load(const std::string& tilesetPath, sf::Vector2u tileSize, const int* tiles)
+bool TileMap::load(const std::string& tilesetPath, sf::Vector2u tileSize, 
+    const int* tiles)
 {
     unsigned int width = mapWidth;
 	unsigned int height = mapHeight;
@@ -24,21 +25,23 @@ bool TileMap::load(const std::string& tilesetPath, sf::Vector2u tileSize, const 
     m_vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
     m_vertices.resize(width * height * 6);
 
-    for (unsigned int i = 0; i < width; ++i)
+    for (unsigned int y = 0; y < height; ++y)
     {
-        for (unsigned int j = 0; j < height; ++j)
+        for (unsigned int x = 0; x < width; ++x)
         {
-            int tileNumber = tiles[i + j * width];
+            int tileNumber = tiles[x + y * width];
 
-            int tu = tileNumber % (m_tileset.getSize().x / tileSize.x);
-            int tv = tileNumber / (m_tileset.getSize().x / tileSize.x);
+            unsigned int tilesPerRow = m_tileset.getSize().x / tileSize.x;
 
-            sf::Vertex* triangles = &m_vertices[(i + j * width) * 6];
+            int tu = tileNumber % tilesPerRow;
+            int tv = tileNumber / tilesPerRow;
 
-            sf::Vector2f p0(i * tileSize.x, j * tileSize.y);
-            sf::Vector2f p1((i + 1) * tileSize.x, j * tileSize.y);
-            sf::Vector2f p2((i + 1) * tileSize.x, (j + 1) * tileSize.y);
-            sf::Vector2f p3(i * tileSize.x, (j + 1) * tileSize.y);
+            sf::Vertex* triangles = &m_vertices[(x + y * width) * 6];
+
+            sf::Vector2f p0(x * tileSize.x, y * tileSize.y);
+            sf::Vector2f p1((x + 1) * tileSize.x, y * tileSize.y);
+            sf::Vector2f p2((x + 1) * tileSize.x, (y + 1) * tileSize.y);
+            sf::Vector2f p3(x * tileSize.x, (y + 1) * tileSize.y);
 
             sf::Vector2f t0(tu * tileSize.x, tv * tileSize.y);
             sf::Vector2f t1((tu + 1) * tileSize.x, tv * tileSize.y);
@@ -59,7 +62,8 @@ bool TileMap::load(const std::string& tilesetPath, sf::Vector2u tileSize, const 
     return true;
 }
 
-void TileMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
+void TileMap::draw(sf::RenderTarget& target, 
+    sf::RenderStates states) const 
 {
     states.transform *= getTransform();
     states.texture = &m_tileset;
