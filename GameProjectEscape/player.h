@@ -38,14 +38,15 @@ struct boolPlayerState
 	bool attack = false;
 };
 
+// Structure pour stocker les informations du joueur
 struct PlayerInfo
 {
 	std::string name;
-	int health;
-	int maxHealth;
-	int attackPower;
-	int defense;
-	int speed;
+	float health;
+	float maxHealth;
+	float attackPower;
+	float defense;
+	float speed;
 };
 
 // Enumération pour les différentes directions du joueur
@@ -93,35 +94,85 @@ enum class Keys
 //==========================================================
 class Player {
 public:
+	//===============================
+	// Création du sprite du joueur
+	//===============================
 	Player(sf::Texture& texture, sf::Sprite& sprite, const std::string& textureFile);
+	
+	//===============================
+	// Mise à jour de la position du joueur en fonction des entrées clavier et de l'état du joueur
+	//===============================
 	void update(float dt, const sf::RenderWindow & window, sf::Sprite& sprite);
-	void draw(sf::RenderWindow & window, sf::Sprite& sprite);
+	
+	//===============================
+	// Initialisation des informations du joueur (nom, santé, puissance d'attaque, défense, vitesse, etc.)
+	//===============================
 	void initialState(std::string);
+
+	//===============================
+	// Gestion des événements clavier pour mettre à jour les booléens correspondants aux touches pressées ou relâchées
+	//===============================
 	void handleEvent(const sf::Event& event);
 
+	//===============================
+	// Affichage du sprite du joueur à l'écran
+	//===============================
+	void draw(sf::RenderWindow& window, sf::Sprite& sprite);
+
 private:
+	//===============================
+	// Gestion des entrées clavier pour déplacer le joueur et changer son état
+	//===============================
 	void handleInput(sf::Sprite& sprite);
+
+	//===============================
+	// Mise à jour de l'animation du joueur en fonction de son état et de sa direction
+	//===============================
 	void updateAnimation(float deltaTime, sf::Sprite& sprite);
 	
-	
+	// Texture et sprite du joueur
 	std::string textureFile;
 
+	// Rectangle source pour l'animation du joueur
 	sf::IntRect rectSource;
+	// Horloge pour gérer le temps entre les frames d'animation
 	sf::Clock animationClock;
 
+	// Direction actuelle du joueur
 	Direction direction;
+	// Structure pour stocker les différents états du joueur sous forme de booléens
 	boolPlayerState boolState;
+	// État actuel du joueur
 	PlayerState state;
+	// État précédent du joueur pour gérer les transitions d'animation
 	PlayerState previousState;
+	// Informations sur le joueur
 	PlayerInfo player;
 
+	// Booléens pour gérer le déplacement à gauche
 	bool leftHeld = false;
+	// Booléens pour gérer le déplacement à droite
 	bool rightHeld = false;
+	// Booléens pour gérer le déplacement en haut
 	bool upHeld = false;
+	// Booléens pour gérer le déplacement en bas
 	bool downHeld = false;
 
+	// Booléens pour gérer l'inventaire du joueur
+	bool inventory = false;
+	// Booléens pour gérer l'interaction avec les objets du jeu
+	bool interact = false;
+
+	// Booléen pour gérer l'attaque du joueur
+	bool attackPressed = false;
+	// Booléen pour savoir si le joueur est en train d'attaquer
+	bool attacking = false;
+
+	// Mémoriser la dernière direction horizontale
 	Direction lastHorizontal = Direction::RIGHT;
+	// Mémoriser la dernière direction verticale
 	Direction lastVertical = Direction::DOWN;
 
-	float speed;
+	// Vitesse de déplacement du joueur
+	PlayerInfo speed;
 };

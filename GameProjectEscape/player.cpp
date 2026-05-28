@@ -11,12 +11,9 @@
 #include "player.h"
 #include <iostream>
 
-//===============================
-// Création du sprite du joueur
-//===============================
 Player::Player(sf::Texture &texture, sf::Sprite &sprite, const std::string& tf)
 	: state(PlayerState::IDLE), previousState(PlayerState::IDLE), 
-	  direction(Direction::RIGHT), speed(0.3f)
+	  direction(Direction::RIGHT)
 {
 	textureFile = tf;
 
@@ -49,25 +46,21 @@ Player::Player(sf::Texture &texture, sf::Sprite &sprite, const std::string& tf)
 	sprite.setScale({ 1.0f, 1.0f });        // Modifier la taille du sprite du joueur
 }
 
-//===============================
-// Initialisation des informations du joueur (nom, santé, puissance d'attaque, défense, vitesse, etc.)
-//===============================
 void Player::initialState(std::string characterName) {
 	player.name = characterName;
 	player.health = 100;
 	player.maxHealth = 100;
 	player.attackPower = 10;
 	player.defense = 5;
-	player.speed = 5;
+	player.speed = 0.5f;
 }
 
-//===============================
-// Gestion des entrées clavier pour déplacer le joueur et changer son état
-//===============================
 void Player::handleInput(sf::Sprite& sprite) {
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::K)) boolState.dead = false; // Si le joueur est vivant, on réinitialise l'état de mort
+	// Si le bouton K est pressé, le joueur n'est plus mort
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::K)) boolState.dead = false;
 
-	if (boolState.dead) return; // Si le joueur est endommagé ou mort, on ne gère pas les entrées clavier
+	// Si le joueur est mort, on ne gère pas les entrées clavier
+	if (boolState.dead) return;
 
 	sf::Vector2f movement = { 0.f, 0.f };
 
@@ -129,13 +122,11 @@ void Player::handleInput(sf::Sprite& sprite) {
 
 	boolState.run = moving && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift);
 
-	boolState.attack = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
-
 	boolState.walk = moving && !boolState.run;
 
 	boolState.idle = !moving && !boolState.attack;
 
-	speed = boolState.run ? 0.7f : 0.3f;
+	player.speed = boolState.run ? 1.0f : 0.5f;
 
 	// Normaliser le vecteur de mouvement pour éviter que le personnage ne se déplace plus vite en diagonale
 	if (movement.x != 0.f || movement.y != 0.f)
@@ -147,16 +138,20 @@ void Player::handleInput(sf::Sprite& sprite) {
 		movement /= length;
 	}
 
-	sprite.move(movement * speed);
+	sprite.move(movement * player.speed);
 
 	// Gestion des entrées clavier pour changer l'état du joueur (dommage, mort)
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::J)) boolState.damaged = true;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::L)) boolState.dead = true;
+
+	if (attackPressed && !attacking) {
+		state = PlayerState::ATTACKING;
+		attacking = true;
+	}
+
+	attackPressed = false; // Réinitialiser l'état d'attaque après la gestion des entrées clavier
 }
 
-//===============================
-// Mise à jour de la position du joueur en fonction des entrées clavier et de l'état du joueur
-//===============================
 void Player::update(float dt, const sf::RenderWindow& window, sf::Sprite& sprite) {
 	// Gestion des entrées clavier pour déplacer le joueur et changer son état
 	handleInput(sprite);
@@ -174,15 +169,10 @@ void Player::update(float dt, const sf::RenderWindow& window, sf::Sprite& sprite
 
 	sprite.setPosition(pos);
 
-	//if (lastHorizontal == Direction::RIGHT)
-	//	sprite.setScale({ 1.f, 1.f });	// Pour que le personnage regarde vers la droite
-	//else if (lastHorizontal == Direction::LEFT)
-	//	sprite.setScale({ -1.f, 1.f }); // Pour que le personnage regarde vers la gauche
-
 	// Mise à jour de l'état du joueur en fonction des booléens
 	if (boolState.dead) state = PlayerState::DEAD;
 	else if (boolState.damaged) state = PlayerState::DAMAGED;
-	else if (boolState.attack) state = PlayerState::ATTACKING;
+	else if (attacking) state = PlayerState::ATTACKING;
 	else if (boolState.run) state = PlayerState::RUNNING;
 	else if (boolState.walk) state = PlayerState::WALKING;
 	else state = PlayerState::IDLE;
@@ -191,9 +181,6 @@ void Player::update(float dt, const sf::RenderWindow& window, sf::Sprite& sprite
 	updateAnimation(dt, sprite);
 }
 
-//===============================
-// Mise à jour de l'animation du joueur en fonction de son état et de sa direction
-//===============================
 void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 	// Si l'état du joueur a changé, on réinitialise l'animation
 	if (state != previousState)
@@ -214,20 +201,25 @@ void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 	}
 
 	// Déterminer le temps entre les frames et le nombre de frames en fonction de l'état du joueur
-	float frameTime = (state == PlayerState::RUNNING) ? 0.09f :
-					  (state == PlayerState::ATTACKING) ? 0.09f :
-					  (state == PlayerState::DAMAGED) ? 0.1f :
-					  (state == PlayerState::DEAD) ? 0.1f : 0.3f;
-	int maxFrames = (state == PlayerState::IDLE) ? 2 :
-					(state == PlayerState::WALKING) ? 4 :
-					(state == PlayerState::RUNNING) ? 8 : 
-					(state == PlayerState::ATTACKING) ? 8 :
-					(state == PlayerState::DAMAGED) ? 3 :
-					(state == PlayerState::DEAD) ? 8 : 1;
+	float frameTime = 
+		(state == PlayerState::RUNNING) ? 0.07f :
+		(state == PlayerState::WALKING) ? 0.1f :
+		(state == PlayerState::ATTACKING) ? 0.04f :
+		(state == PlayerState::DAMAGED) ? 0.1f :
+		(state == PlayerState::DEAD) ? 0.1f : 0.3f;
+	int maxFrames = 
+		(state == PlayerState::IDLE) ? 2 :
+		(state == PlayerState::WALKING) ? 4 :
+		(state == PlayerState::RUNNING) ? 8 :
+		(state == PlayerState::ATTACKING) ? 8 :
+		(state == PlayerState::DAMAGED) ? 3 :
+		(state == PlayerState::DEAD) ? 8 : 1;
+
 	// Mettre à jour l'animation du joueur en fonction du temps écoulé
 	if (animationClock.getElapsedTime().asSeconds() >= frameTime) {
 		rectSource.position.x += 32;
 		if (rectSource.position.x >= maxFrames * 32) {
+			// Si l'animation est terminée, on réinitialise la position de la source en fonction de l'état du joueur
 			if (state == PlayerState::DEAD)
 			{
 				rectSource.position.x = (maxFrames - 1) * 32;
@@ -236,6 +228,15 @@ void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 			{
 				rectSource.position.x = 0;
 				boolState.damaged = false; // Réinitialiser l'état de dommage après l'animation
+			}
+			else if (state == PlayerState::ATTACKING)
+			{
+				// Réinitialiser l'état d'attaque après l'animation
+				attacking = false;
+
+				rectSource.position.x = 0;
+
+				state = PlayerState::IDLE; // Revenir à l'état idle après l'animation d'attaque
 			}
 			else
 			{
@@ -247,9 +248,6 @@ void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 	}
 }
 
-//===============================
-// Gestion des événements clavier pour mettre à jour les booléens correspondants aux touches pressées ou relâchées
-//===============================
 void Player::handleEvent(const sf::Event& event)
 {
 	if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
@@ -305,13 +303,25 @@ void Player::handleEvent(const sf::Event& event)
 		case sf::Keyboard::Key::Down:
 			downHeld = false;
 			break;
+		case sf::Keyboard::Key::Space:
+		case sf::Keyboard::Key::Enter:
+			attackPressed = true;
+			break;
+		case sf::Keyboard::Key::I:
+			inventory = !inventory; // Toggle inventory
+			break;
 		}
 	}
+
+	/*if (const auto* mouseButtonPressed = event.getIf<sf::Event::MouseButtonPressed>())
+	{
+		if (mouseButtonPressed->button == sf::Mouse::Button::Left)
+		{
+			attackPressed = true;
+		}
+	}*/
 }
 
-//===============================
-// Affichage du sprite du joueur à l'écran
-//===============================
 void Player::draw(sf::RenderWindow& window, sf::Sprite& sprite) {
 	window.draw(sprite);
 }
