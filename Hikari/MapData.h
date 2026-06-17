@@ -6,11 +6,8 @@
 //====================================
 
 #pragma once
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <string>
-#include <iostream>
+
+#include "GameHeaders.h"
 
 //===============================
 // Fonction pour charger une carte de tuiles à partir d'un fichier CSV

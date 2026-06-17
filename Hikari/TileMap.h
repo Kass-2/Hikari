@@ -6,8 +6,8 @@
 //====================================
 
 #pragma once
-#include <SFML/Graphics.hpp>
-#include <string>
+
+#include "GameHeaders.h"
 
 class TileMap : public sf::Drawable, public sf::Transformable
 {

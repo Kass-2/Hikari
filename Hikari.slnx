@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="GameProjectEscape/GameProjectEscape.vcxproj" Id="7b7854ee-8b41-445e-9a07-b2e45640f9b1" />
+  <Project Path="Hikari/Hikari.vcxproj" Id="7b7854ee-8b41-445e-9a07-b2e45640f9b1" />
 </Solution>

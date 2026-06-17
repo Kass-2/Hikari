@@ -16,32 +16,62 @@
     <Filter Include="Resource Files\Assets">
       <UniqueIdentifier>{765ed2fb-456a-4171-8024-0e621180dbab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Assets\PlayerCharacter">
+      <UniqueIdentifier>{3af9cffb-f38f-4b20-afad-2d3df61bd8e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Assets\Maps">
+      <UniqueIdentifier>{21166b97-fcd8-4ff7-9a33-24dd0ad1c5d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Map">
+      <UniqueIdentifier>{92afe215-b373-42ad-acad-07eab966d06c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Player">
+      <UniqueIdentifier>{054dd2db-a8af-45e7-99b5-90d9f25d9e1e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="player.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="MapData.cpp">
+      <Filter>Source Files\Map</Filter>
     </ClCompile>
-    <ClCompile Include="tileMap.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="TileMap.cpp">
+      <Filter>Source Files\Map</Filter>
     </ClCompile>
-    <ClCompile Include="mapData.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="InputManager.cpp">
+      <Filter>Source Files\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Animations.cpp">
+      <Filter>Source Files\Player</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="entity.h">
+    <ClInclude Include="Entity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="player.h">
+    <ClInclude Include="Player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tileMap.h">
+    <ClInclude Include="TileMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="mapData.h">
+    <ClInclude Include="MapData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InputManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameHeaders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Animations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -69,7 +99,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\InitialMap.csv">
-      <Filter>Resource Files\Assets</Filter>
+      <Filter>Resource Files\Assets\Maps</Filter>
     </None>
   </ItemGroup>
 </Project>

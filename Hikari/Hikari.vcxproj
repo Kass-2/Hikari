@@ -24,6 +24,7 @@
     <ProjectGuid>{7b7854ee-8b41-445e-9a07-b2e45640f9b1}</ProjectGuid>
     <RootNamespace>GameProjectEscape</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Hikari</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -133,16 +134,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="mapData.cpp" />
+    <ClCompile Include="Animations.cpp" />
+    <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="MapData.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="player.cpp" />
-    <ClCompile Include="tileMap.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="TileMap.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="entity.h" />
-    <ClInclude Include="mapData.h" />
-    <ClInclude Include="player.h" />
-    <ClInclude Include="tileMap.h" />
+    <ClInclude Include="Animations.h" />
+    <ClInclude Include="Entity.h" />
+    <ClInclude Include="GameHeaders.h" />
+    <ClInclude Include="InputManager.h" />
+    <ClInclude Include="MapData.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="PlayerData.h" />
+    <ClInclude Include="TileMap.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Ground.png" />

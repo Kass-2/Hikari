@@ -16,6 +16,9 @@ TileMap::TileMap(unsigned int mapWidth, unsigned int mapHeight)
 bool TileMap::load(const std::string& tilesetPath, sf::Vector2u tileSize, 
     const int* tiles)
 {
+    float tileWidth = static_cast<float>(tileSize.x);
+    float tileHeight = static_cast<float>(tileSize.y);
+
     unsigned int width = mapWidth;
 	unsigned int height = mapHeight;
 
@@ -38,15 +41,15 @@ bool TileMap::load(const std::string& tilesetPath, sf::Vector2u tileSize,
 
             sf::Vertex* triangles = &m_vertices[(x + y * width) * 6];
 
-            sf::Vector2f p0(x * tileSize.x, y * tileSize.y);
-            sf::Vector2f p1((x + 1) * tileSize.x, y * tileSize.y);
-            sf::Vector2f p2((x + 1) * tileSize.x, (y + 1) * tileSize.y);
-            sf::Vector2f p3(x * tileSize.x, (y + 1) * tileSize.y);
+            sf::Vector2f p0(x * tileWidth, y * tileHeight);
+            sf::Vector2f p1((x + 1) * tileWidth, y * tileHeight);
+            sf::Vector2f p2((x + 1) * tileWidth, (y + 1) * tileHeight);
+            sf::Vector2f p3(x * tileWidth, (y + 1) * tileHeight);
 
-            sf::Vector2f t0(tu * tileSize.x, tv * tileSize.y);
-            sf::Vector2f t1((tu + 1) * tileSize.x, tv * tileSize.y);
-            sf::Vector2f t2((tu + 1) * tileSize.x, (tv + 1) * tileSize.y);
-            sf::Vector2f t3(tu * tileSize.x, (tv + 1) * tileSize.y);
+            sf::Vector2f t0(tu * tileWidth, tv * tileHeight);
+            sf::Vector2f t1((tu + 1) * tileWidth, tv * tileHeight);
+            sf::Vector2f t2((tu + 1) * tileWidth, (tv + 1) * tileHeight);
+            sf::Vector2f t3(tu * tileWidth, (tv + 1) * tileHeight);
 
             // Triangle 1
             triangles[0].position = p0; triangles[0].texCoords = t0;

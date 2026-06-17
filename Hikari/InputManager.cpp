@@ -1,0 +1,196 @@
+//===============================
+// Fichier : InputManager.cpp
+// Description : Implémentation de la classe InputManager pour gérer les entrées clavier du joueur
+// Auteur : Aboubacar Sanogo
+// Version : 1.0
+//===============================
+
+//===============================
+// Inclusion des bibliothèques nécessaires
+//===============================
+#include "InputManager.h"
+#include <SFML/Graphics/Sprite.hpp>
+
+sf::Vector2f InputManager::handleMovement(
+	sf::Sprite& sprite, 
+	PlayerStates& playerState, 
+	PlayerInfo& player, 
+	HeldDirection& heldState, 
+	DirectionInfo& DInfo, 
+	AttackInfo& AInfo)
+{	
+	// Vecteur de mouvement du joueur en fonction des entrées clavier
+	sf::Vector2f movement = { 0.f, 0.f };
+
+	// Mémoriser les états des touches pour gérer les cas où les deux touches sont pressées en même temps
+	if (heldState.leftHeld && heldState.rightHeld)
+	{
+		if (DInfo.lastHorizontal == Direction::LEFT)
+		{
+			movement.x = -1.f;
+			DInfo.direction = Direction::LEFT;
+		}
+		else
+		{
+			movement.x = 1.f;
+			DInfo.direction = Direction::RIGHT;
+		}
+	}
+	else if (heldState.leftHeld)
+	{
+		movement.x = -1.f;
+		DInfo.direction = Direction::LEFT;
+	}
+	else if (heldState.rightHeld)
+	{
+		movement.x = 1.f;
+		DInfo.direction = Direction::RIGHT;
+	}
+
+	// Mémoriser la dernière direction horizontale pour gérer les cas où les deux touches sont pressées en même temps
+	if (heldState.upHeld && heldState.downHeld)
+	{
+		if (DInfo.lastVertical == Direction::UP)
+		{
+			movement.y = -1.f;
+			DInfo.direction = Direction::UP;
+		}
+		else
+		{
+			movement.y = 1.f;
+			DInfo.direction = Direction::DOWN;
+		}
+	}
+	else if (heldState.upHeld)
+	{
+		movement.y = -1.f;
+		DInfo.direction = Direction::UP;
+	}
+	else if (heldState.downHeld)
+	{
+		movement.y = 1.f;
+		DInfo.direction = Direction::DOWN;
+	}
+
+	bool moving = (movement.x != 0.f || movement.y != 0.f);
+
+	playerState.run = moving && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift);
+
+	playerState.walk = moving && !playerState.run;
+
+	playerState.idle = !moving && !AInfo.attacking;
+
+	// Si le joueur est en train d'attaquer, on réduit sa vitesse de déplacement
+	if (AInfo.attacking) player.speed *= 0.25f;
+	else player.speed = playerState.run ? 5.5f : 0.75f;
+
+	// Normaliser le vecteur de mouvement pour éviter que le personnage ne se déplace plus vite en diagonale
+	if (movement.x != 0.f || movement.y != 0.f)
+	{
+		float length = std::sqrt(
+			movement.x * movement.x +
+			movement.y * movement.y);
+
+		movement = (movement / length);
+	}
+	// Appliquer une légère réduction de la vitesse en diagonale pour éviter que le personnage ne se déplace plus vite en diagonale
+	if (movement.x != 0.f && movement.y != 0.f)
+	{
+		movement *= 0.9f;
+	}
+	
+	return movement;
+}
+
+void InputManager::handleEvent(const sf::Event& event, 
+	HeldDirection& heldState, 
+	DirectionInfo& DInfo, 
+	AttackInfo& AInfo, 
+	PlayerStates& playerState, 
+	bool& inventory)
+{
+	if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
+	{
+		switch (keyPressed->code)
+		{
+		case sf::Keyboard::Key::A:
+		case sf::Keyboard::Key::Left:
+			heldState.leftHeld = true;
+			DInfo.lastHorizontal = Direction::LEFT;
+			break;
+
+		case sf::Keyboard::Key::D:
+		case sf::Keyboard::Key::Right:
+			heldState.rightHeld = true;
+			DInfo.lastHorizontal = Direction::RIGHT;
+			break;
+
+		case sf::Keyboard::Key::W:
+		case sf::Keyboard::Key::Up:
+			heldState.upHeld = true;
+			DInfo.lastVertical = Direction::UP;
+			break;
+
+		case sf::Keyboard::Key::S:
+		case sf::Keyboard::Key::Down:
+			heldState.downHeld = true;
+			DInfo.lastVertical = Direction::DOWN;
+			break;
+		}
+	}
+
+	if (const auto* keyReleased = event.getIf<sf::Event::KeyReleased>())
+	{
+		switch (keyReleased->code)
+		{
+			// Touches de déplacement vers la gauche
+		case sf::Keyboard::Key::A:
+		case sf::Keyboard::Key::Left:
+			heldState.leftHeld = false;
+			break;
+			// Touches de déplacement vers la droite
+		case sf::Keyboard::Key::D:
+		case sf::Keyboard::Key::Right:
+			heldState.rightHeld = false;
+			break;
+			// Touches de déplacement vers le haut
+		case sf::Keyboard::Key::W:
+		case sf::Keyboard::Key::Up:
+			heldState.upHeld = false;
+			break;
+			// Touches de déplacement vers le bas
+		case sf::Keyboard::Key::S:
+		case sf::Keyboard::Key::Down:
+			heldState.downHeld = false;
+			break;
+			// Touches d'attaque (espace ou entrée)
+		case sf::Keyboard::Key::Space:
+		case sf::Keyboard::Key::Enter:
+			AInfo.attackPressed = true;
+			break;
+			// Touche de test pour endommager le joueur (à supprimer plus tard)
+		case sf::Keyboard::Key::J:
+			playerState.damaged = true;
+			break;
+			// Touche de test pour revive le joueur (à supprimer plus tard)
+		case sf::Keyboard::Key::K:
+			playerState.dead = false;
+			break;
+			// Touche de test pour tuer le joueur (à supprimer plus tard)
+		case sf::Keyboard::Key::L:
+			playerState.dead = true;
+			break;
+		case sf::Keyboard::Key::I:
+			inventory = !inventory; // Toggle inventory
+			break;
+		}
+	}
+
+	/*if (const auto* mouseButtonPressed = event.getIf<sf::Event::MouseButtonPressed>())
+	{
+		if (mouseButtonPressed->button == sf::Mouse::Button::Left)
+		{
+			attackPressed = true;
+		}
+	}*/
+}

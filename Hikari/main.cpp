@@ -5,11 +5,15 @@
 // Version : 1.0
 //===============================
 
+//===============================
+// Inclusion des bibliothèques nécessaires
+//===============================
+#include "Player.h"
 #include <iostream>
-#include <SFML/Graphics.hpp>
-#include "player.h"
-#include "tileMap.h"
-#include "mapData.h"
+#include "MapData.h"
+#include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
 //===============================
 // Constantes pour la taille des tuiles et les dimensions de la carte
@@ -27,7 +31,7 @@ int main()
 	//===============================
 	// Creation de la fenêtre de jeu
 	//===============================
-    sf::RenderWindow window(sf::VideoMode({ WINDOW_WIDTH, WINDOW_HEIGHT }), "Game Project Escape Prototype");
+    sf::RenderWindow window(sf::VideoMode({ WINDOW_WIDTH, WINDOW_HEIGHT }), "Hikari");
 	window.setFramerateLimit(60);
 
 	//===============================
@@ -36,8 +40,21 @@ int main()
 	sf::Texture texture;
 	sf::Sprite sprite(texture);
 
-	Player playerCharacter(texture, sprite, "Assets/player.png");
+	Player playerCharacter(texture, sprite, "Assets/adventurer.png", 96, 80);
 	playerCharacter.initialState("Sid");
+
+	//===============================
+	// Création du sprite et de la texture du personnage de test
+	//===============================
+	sf::Texture testTexture;
+	sf::Sprite testSprite(testTexture);
+
+	Player testCharacter(testTexture, testSprite, "Assets/adventurer.png", 96, 80);
+	testCharacter.initialState("Test");
+	testCharacter.setPlayerPosition(testSprite, 200.f, 200.f);
+
+	// Verrouiller le mouvement du personnage de test pour éviter qu'il ne se déplace pendant les tests
+	testCharacter.LockPlayer();
 
 	//===============================
 	// Création de la carte de tuiles
@@ -63,6 +80,8 @@ int main()
 		return -1;
 	}
 
+	std::vector<Player> players;
+
 	//===============================
 	// Loop principal du jeu
 	//===============================
@@ -73,14 +92,21 @@ int main()
             if (event->is<sf::Event::Closed>())
                 window.close();
 
+			/*for (int i = 0; i < players.size(); ++i) {
+				players[i].handleEvent(*event);
+			}*/
 			playerCharacter.handleEvent(*event);
+			testCharacter.handleEvent(*event);
         }
 
 		playerCharacter.update(1.f / 60.f, window, sprite);
+		testCharacter.update(1.f / 60.f, window, testSprite);
 
         window.clear(sf::Color(50,50,50));
 		window.draw(tileMap);
+		testCharacter.draw(window, testSprite);
 		playerCharacter.draw(window, sprite);
+		
         window.display();
     }
 	return 0;

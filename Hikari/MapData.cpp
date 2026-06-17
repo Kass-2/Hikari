@@ -5,8 +5,9 @@
 // Version : 1.0
 //====================================
 
-#include "mapData.h"
+#include "GameHeaders.h"
 
+// TODO : Revoir cette fonction, car j'ai pas vraiment compris comment elle fonctionne, et je pense qu'elle peut être améliorée
 bool loadCSV(const std::string& filename, std::vector<int>& map, int& width, int& height)
 {
     std::ifstream file(filename);

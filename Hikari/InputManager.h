@@ -1,0 +1,39 @@
+//====================================
+// Fichier : InputManager.h
+// Description : Implémentation de la classe InputManager pour gérer les entrées clavier du joueur
+// Auteur : Aboubacar Sanogo
+// Version : 1.0
+//====================================
+
+#pragma once
+
+//===============================
+// Inclusion des bibliothèques
+//===============================
+#include "GameHeaders.h"
+#include "PlayerData.h"
+
+class InputManager
+{
+public:
+	//===============================
+	// Fonction pour gérer les entrées clavier du joueur et mettre à jour les booléens correspondants
+	//===============================
+	sf::Vector2f handleMovement(
+		sf::Sprite& sprite, 
+		PlayerStates& playerState, 
+		PlayerInfo& player, 
+		HeldDirection& heldState, 
+		DirectionInfo& DInfo,
+		AttackInfo& AInfo);
+
+	//===============================
+	// Fonction pour gérer les événements clavier et mettre à jour les booléens correspondants
+	//===============================
+	void handleEvent(const sf::Event& event, 
+		HeldDirection& heldState, 
+		DirectionInfo& DInfo, 
+		AttackInfo& AInfo, 
+		PlayerStates& playerState, 
+		bool& inventory);
+};
