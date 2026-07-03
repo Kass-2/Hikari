@@ -82,7 +82,7 @@ sf::Vector2f InputManager::handleMovement(
 
 	// Si le joueur est en train d'attaquer, on réduit sa vitesse de déplacement
 	if (AInfo.attacking) player.speed *= 0.25f;
-	else player.speed = playerState.run ? 5.5f : 0.75f;
+	else player.speed = playerState.run ? (3.f * 60) : (1.25f * 60);
 
 	// Normaliser le vecteur de mouvement pour éviter que le personnage ne se déplace plus vite en diagonale
 	if (movement.x != 0.f || movement.y != 0.f)

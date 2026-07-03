@@ -25,7 +25,7 @@ public:
 		//===============================
 		// Fonction pour réinitialiser l'animation
 		//===============================
-		void resetAnimation(sf::IntRect rectSource, int row) const;
+		void resetAnimation(sf::IntRect& rectSource, int row) const;
 
 private:
 	// FrameHauteur : Hauteur de la partie de la texture à afficher

@@ -24,6 +24,7 @@
 //===============================
 #include "GameHeaders.h"
 #include "PlayerData.h"
+#include "Animations.h"
 
 //=========================================================
 // Classe Player qui hérite de Entity et qui gère les mouvements, les animations et les états du joueur.
@@ -42,6 +43,11 @@ public:
 	// Fonction pour définir la position du joueur
 	//===============================
 	void setPlayerPosition(sf::Sprite& sprite, float x, float y);
+
+	//===============================
+	// Fonction pour obtenir la hitbox du joueur en fonction de son sprite
+	//===============================
+	sf::FloatRect getHitbox(const sf::Sprite& sprite) const;
 
 	//===============================
 	// Mise à jour de la position du joueur en fonction des entrées clavier et de l'état du joueur
@@ -100,8 +106,8 @@ private:
 	void handleRows(DirectionInfo& DInfo, SpriteRows& rows) const;
 
 	//===============================
-// Fonction pour réinitialiser l'animation du joueur lorsque son état ou sa direction change
-//===============================
+	// Fonction pour réinitialiser l'animation du joueur lorsque son état ou sa direction change
+	//===============================
 	void resetPlayer(bool animationChanged, sf::Sprite& sprite, SpriteRows rows, Animations reset);
 
 	// Informations d'animation du joueur

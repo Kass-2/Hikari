@@ -106,12 +106,12 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\SFML\SFML-3.0.2-windows-vc17-64-bit\SFML-3.0.2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>"C:\SFML\SFML-3.0.2-windows-vc17-64-bit\SFML-3.0.2\include"</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\SFML\SFML-3.0.2-windows-vc17-64-bit\SFML-3.0.2\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>"C:\SFML\SFML-3.0.2-windows-vc17-64-bit\SFML-3.0.2\lib"</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(CoreLibraryDependencies);sfml-graphics-d.lib;sfml-network-d.lib;sfml-window-d.lib;sfml-audio-d.lib;sfml-main-d.lib;sfml-system-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -124,29 +124,35 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\SFML\SFML-3.0.2-windows-vc17-64-bit\SFML-3.0.2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>"C:\SFML\SFML-3.0.2-windows-vc17-64-bit\SFML-3.0.2\include"</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>$(CoreLibraryDependencies);sfml-graphics.lib;sfml-network.lib;sfml-window.lib;sfml-audio.lib;sfml-main.lib;sfml-system.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\SFML\SFML-3.0.2-windows-vc17-64-bit\SFML-3.0.2\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>"C:\SFML\SFML-3.0.2-windows-vc17-64-bit\SFML-3.0.2\lib"</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Animations.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="HitBox.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="MapData.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MiniMap.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="TileMap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animations.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="GameHeaders.h" />
+    <ClInclude Include="HitBox.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="MapData.h" />
+    <ClInclude Include="MiniMap.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerData.h" />
     <ClInclude Include="TileMap.h" />

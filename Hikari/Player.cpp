@@ -9,7 +9,6 @@
 // Inclusion des bibliothèques nécessaires
 //===============================
 #include "Player.h"
-#include "Animations.h"
 
 Player::Player(sf::Texture &texture, sf::Sprite &sprite, const std::string& tf, int frameWidth, int frameHeight)
 	: playerFrames({0.3f, 8, 0, -1}), rows ({0, 0, 0, 0})
@@ -70,13 +69,28 @@ void Player::setPlayerPosition(sf::Sprite& sprite, float x, float y) {
 	sprite.setPosition({ x, y });
 }
 
+sf::FloatRect Player::getHitbox(const sf::Sprite& sprite) const {
+	// Custom hitbox dimensions (change this to fit your sprite)
+	float width = 16.f;
+	float height = 24.f;
+
+	sf::Vector2f pos = sprite.getPosition();
+
+	// Calculate the top-left coordinate of the hitbox relative to centered origin
+	// This positions the hitbox at the bottom-center of the character's sprite
+	return sf::FloatRect(
+		{ pos.x - width / 2.f, pos.y - 10.f },
+		{ width, height }
+	);
+}
+
 void Player::initialState(std::string characterName) {
 	player.name = characterName;
 	player.health = 100;
 	player.maxHealth = 100;
 	player.attackPower = 10;
 	player.defense = 5;
-	player.speed = 0.75f;
+	player.speed = (1.25f * 60);
 }
 
 void Player::handleInput(sf::Sprite& sprite, float dt) {
@@ -94,7 +108,7 @@ void Player::handleInput(sf::Sprite& sprite, float dt) {
 
 	movement = inputManager.handleMovement(sprite, playerState, player, heldState, DInfo, AInfo);
 
-	sprite.move(movement * player.speed);
+	sprite.move(movement * player.speed * dt);
 
 	if (AInfo.attackPressed && !AInfo.attacking && AInfo.attackCooldown.getElapsedTime().asSeconds() >= AInfo.attackCooldownTime) {
 		playerState.state = PlayerState::ATTACKING;
@@ -141,10 +155,34 @@ void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 	// Determiner les lignes de la texture pour chaque état du joueur en fonction de la direction du joueur
 	handleRows(DInfo, rows);
 
-	// Déterminer si l'animation doit être réinitialisée en fonction du changement d'état ou de direction du joueur
+	// Déterminer la ligne cible dans la feuille de sprites pour l'état actuel
+	int targetRow = 0;
+	if (playerState.state == PlayerState::IDLE)
+		targetRow = rows.idleRow;
+	else if (playerState.state == PlayerState::WALKING)
+		targetRow = rows.walkingRow;
+	else if (playerState.state == PlayerState::RUNNING)
+		targetRow = rows.runningRow;
+	else if (playerState.state == PlayerState::ATTACKING)
+		targetRow = rows.attackingRow;
+	else if (playerState.state == PlayerState::DAMAGED)
+		targetRow = 0;
+	else if (playerState.state == PlayerState::DEAD)
+		targetRow = 1;
+
+	// Vérifier si la ligne de la texture a changé
+	bool rowChanged = !AInfo.attacking && (rectSource.position.y != targetRow * fH);
+
+	// Déterminer si l'animation doit être réinitialisée
 	bool animationChanged =
 		(playerState.state != playerState.previousState)
-		|| (!AInfo.attacking && DInfo.direction != DInfo.previousDirection);
+		|| (!AInfo.attacking && DInfo.direction != DInfo.previousDirection)
+		|| rowChanged;
+
+	//// Déterminer si l'animation doit être réinitialisée en fonction du changement d'état ou de direction du joueur
+	//bool animationChanged =
+	//	(playerState.state != playerState.previousState)
+	//	|| (!AInfo.attacking && DInfo.direction != DInfo.previousDirection);
 
 	// Déterminer la ligne de la texture à utiliser en fonction de l'état du joueur
 	resetPlayer(animationChanged, sprite, rows, playerAnimation);
@@ -236,8 +274,7 @@ void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 	playerFrames.pf = playerFrames.cf;
 }
 
-void Player::handlePlayerState(PlayerStates& playerState, AttackInfo& AInfo) const 
-{
+void Player::handlePlayerState(PlayerStates& playerState, AttackInfo& AInfo) const {
 	if (playerState.dead) playerState.state = PlayerState::DEAD;
 	else if (playerState.damaged) playerState.state = PlayerState::DAMAGED;
 	else if (AInfo.attacking) playerState.state = PlayerState::ATTACKING;
@@ -247,6 +284,12 @@ void Player::handlePlayerState(PlayerStates& playerState, AttackInfo& AInfo) con
 }
 
 void Player::handleRows(DirectionInfo& DInfo, SpriteRows& rows) const {
+	// Déterminer la direction horizontale active en cas de conflit (A et D pressés en même temps)
+	bool isMovingLeft = heldState.leftHeld && (!heldState.rightHeld || DInfo.
+	lastHorizontal == Direction::LEFT);
+	bool isMovingRight = heldState.rightHeld && (!heldState.leftHeld || DInfo.
+		lastHorizontal == Direction::RIGHT);
+
 	// Les lignes pour l'état d'attaque sont différentes pour chaque direction
 	rows.attackingRow =
 		DInfo.direction == Direction::DOWN ? 1 :
@@ -261,8 +304,10 @@ void Player::handleRows(DirectionInfo& DInfo, SpriteRows& rows) const {
 		DInfo.direction == Direction::RIGHT ? 15 : 13;
 	// Les lignes pour l'état de course sont différentes pour chaque direction
 	rows.runningRow =
-		(heldState.leftHeld && heldState.upHeld || heldState.leftHeld && heldState.downHeld) ? 14 :
-		(heldState.rightHeld && heldState.upHeld || heldState.rightHeld && heldState.downHeld) ? 15 :
+		(isMovingLeft && heldState.upHeld || isMovingLeft && heldState.downHeld) ? 14 :
+		(isMovingRight && heldState.upHeld || isMovingRight && heldState.downHeld) ? 15 :
+		/*(heldState.leftHeld && heldState.upHeld || heldState.leftHeld && heldState.downHeld) ? 14 :
+		(heldState.rightHeld && heldState.upHeld || heldState.rightHeld && heldState.downHeld) ? 15 :*/
 		DInfo.direction == Direction::DOWN ? 13 :
 		DInfo.direction == Direction::UP ? 16 :
 		DInfo.direction == Direction::LEFT ? 14 :
@@ -302,9 +347,9 @@ void Player::resetPlayer(bool animationChanged, sf::Sprite& sprite, SpriteRows r
 		else if (playerState.state == PlayerState::ATTACKING)
 			reset.resetAnimation(rectSource, rows.attackingRow);
 		else if (playerState.state == PlayerState::DAMAGED)
-			reset.resetAnimation(rectSource, 0 * fH);
+			reset.resetAnimation(rectSource, 0);
 		else if (playerState.state == PlayerState::DEAD)
-			reset.resetAnimation(rectSource, 1 * fH);
+			reset.resetAnimation(rectSource, 1);
 
 		sprite.setTextureRect(rectSource);
 

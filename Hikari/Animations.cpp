@@ -16,7 +16,7 @@ Animations::Animations(int frameHeight, int frameWidth) : fH(frameHeight), fL(fr
 
 }
 
-void Animations::resetAnimation(sf::IntRect rectSource, int row) const {
+void Animations::resetAnimation(sf::IntRect& rectSource, int row) const {
 	rectSource.position.x = 0;
 	rectSource.position.y = row * fH;
 }
