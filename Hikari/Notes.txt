@@ -1,3 +1,6 @@
+### Where I am at in my game project
+Continue the sprites sheet for the main character and after do the attack hitbox.
+
 # Notes for my game project "Hikari"
 The name for my game "Hikari" means "light" in Japanese wish is a cultture that I am interested in and want to incorporate into my game.
 
