@@ -36,4 +36,11 @@ public:
 		AttackInfo& AInfo, 
 		PlayerStates& playerState, 
 		bool& inventory);
+
+private:
+	// Énumération pour représenter l'axe de mouvement du joueur
+	enum class Axis { NONE, HORIZONTAL, VERTICAL };
+
+	// Variable pour mémoriser le dernier axe de mouvement du joueur
+	Axis lastPressedAxis = Axis::NONE;
 };

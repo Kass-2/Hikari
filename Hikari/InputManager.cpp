@@ -72,6 +72,42 @@ sf::Vector2f InputManager::handleMovement(
 		DInfo.direction = Direction::DOWN;
 	}
 
+	bool isMovingHorizontal = heldState.leftHeld || heldState.rightHeld;
+	bool isMovingVertical = heldState.upHeld || heldState.downHeld;
+
+	if (isMovingHorizontal && isMovingVertical)
+	{
+		if (lastPressedAxis == Axis::HORIZONTAL)
+		{
+			// Horizontal was pressed last, so vertical was pressed first. Face vertical.
+			if (heldState.upHeld && heldState.downHeld)
+			{
+				DInfo.direction = (DInfo.lastVertical == Direction::UP) ?
+					Direction::UP : Direction::DOWN;
+			}
+			else
+			{
+				DInfo.direction = heldState.upHeld ? Direction::UP :
+					Direction::DOWN;
+			}
+		}
+		else
+		{
+			// Vertical was pressed last, so horizontal was pressed first. Face horizontal.
+			if (heldState.leftHeld && heldState.rightHeld)
+			{
+				DInfo.direction = (DInfo.lastHorizontal ==
+					Direction::LEFT) ?
+					Direction::LEFT : Direction::RIGHT;
+			}
+			else
+			{
+				DInfo.direction = heldState.leftHeld ? Direction::LEFT :
+					Direction::RIGHT;
+			}
+		}
+	}
+
 	bool moving = (movement.x != 0.f || movement.y != 0.f);
 
 	playerState.run = moving && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift);
@@ -117,24 +153,28 @@ void InputManager::handleEvent(const sf::Event& event,
 		case sf::Keyboard::Key::Left:
 			heldState.leftHeld = true;
 			DInfo.lastHorizontal = Direction::LEFT;
+			lastPressedAxis = Axis::HORIZONTAL;
 			break;
 
 		case sf::Keyboard::Key::D:
 		case sf::Keyboard::Key::Right:
 			heldState.rightHeld = true;
 			DInfo.lastHorizontal = Direction::RIGHT;
+			lastPressedAxis = Axis::HORIZONTAL;
 			break;
 
 		case sf::Keyboard::Key::W:
 		case sf::Keyboard::Key::Up:
 			heldState.upHeld = true;
 			DInfo.lastVertical = Direction::UP;
+			lastPressedAxis = Axis::VERTICAL;
 			break;
 
 		case sf::Keyboard::Key::S:
 		case sf::Keyboard::Key::Down:
 			heldState.downHeld = true;
 			DInfo.lastVertical = Direction::DOWN;
+			lastPressedAxis = Axis::VERTICAL;
 			break;
 		}
 	}

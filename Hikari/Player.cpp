@@ -304,10 +304,6 @@ void Player::handleRows(DirectionInfo& DInfo, SpriteRows& rows) const {
 		DInfo.direction == Direction::RIGHT ? 15 : 13;
 	// Les lignes pour l'état de course sont différentes pour chaque direction
 	rows.runningRow =
-		(isMovingLeft && heldState.upHeld || isMovingLeft && heldState.downHeld) ? 14 :
-		(isMovingRight && heldState.upHeld || isMovingRight && heldState.downHeld) ? 15 :
-		/*(heldState.leftHeld && heldState.upHeld || heldState.leftHeld && heldState.downHeld) ? 14 :
-		(heldState.rightHeld && heldState.upHeld || heldState.rightHeld && heldState.downHeld) ? 15 :*/
 		DInfo.direction == Direction::DOWN ? 13 :
 		DInfo.direction == Direction::UP ? 16 :
 		DInfo.direction == Direction::LEFT ? 14 :
