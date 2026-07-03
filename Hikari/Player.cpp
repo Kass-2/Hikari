@@ -166,9 +166,9 @@ void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 	else if (playerState.state == PlayerState::ATTACKING)
 		targetRow = rows.attackingRow;
 	else if (playerState.state == PlayerState::DAMAGED)
-		targetRow = 0;
+		targetRow = rows.damagedRow;
 	else if (playerState.state == PlayerState::DEAD)
-		targetRow = 1;
+		targetRow = rows.deadRow;
 
 	// Vérifier si la ligne de la texture a changé
 	bool rowChanged = !AInfo.attacking && (rectSource.position.y != targetRow * fH);
@@ -188,13 +188,34 @@ void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 	resetPlayer(animationChanged, sprite, rows, playerAnimation);
 
 	// Déterminer le temps entre les frames et le nombre de frames en fonction de l'état du joueur
-	playerFrames.ft = 
-		(playerState.state == PlayerState::RUNNING) ? 0.05f :
-		(playerState.state == PlayerState::WALKING) ? 0.09f :
-		(playerState.state == PlayerState::ATTACKING) ? 0.06f :
-		(playerState.state == PlayerState::IDLE) ? 0.2f :
-		(playerState.state == PlayerState::DAMAGED) ? 0.1f :
-		(playerState.state == PlayerState::DEAD) ? 0.1f : 0.3f;
+	if (playerState.state == PlayerState::RUNNING) {
+		playerFrames.ft = 0.07f;
+		playerFrames.mf = 8;
+	}
+	else if (playerState.state == PlayerState::WALKING) {
+		playerFrames.ft = 0.1f;
+		playerFrames.mf = 8;
+	}
+	else if (playerState.state == PlayerState::ATTACKING) {
+		playerFrames.ft = 0.06f;
+		playerFrames.mf = 8;
+	}
+	else if (playerState.state == PlayerState::IDLE) {
+		playerFrames.ft = 0.2f;
+		playerFrames.mf = 8;
+	}
+	else if (playerState.state == PlayerState::DAMAGED) {
+		playerFrames.ft = 0.05f;
+		playerFrames.mf = 4;
+	}
+	else if (playerState.state == PlayerState::DEAD) {
+		playerFrames.ft = 0.1f;
+		playerFrames.mf = 7;
+	}
+	else {
+		playerFrames.ft = 0.3f;
+		playerFrames.mf = 8;
+	}
 
 	// Mettre à jour l'animation du joueur en fonction du temps écoulé
 	if (animationClock.getElapsedTime().asSeconds() >= playerFrames.ft) {
@@ -298,22 +319,36 @@ void Player::handleRows(DirectionInfo& DInfo, SpriteRows& rows) const {
 		DInfo.direction == Direction::RIGHT ? 3 : 1;
 	// Les lignes pour l'état de marche sont différentes pour chaque direction
 	rows.walkingRow =
-		DInfo.direction == Direction::DOWN ? 13 :
-		DInfo.direction == Direction::UP ? 16 :
-		DInfo.direction == Direction::LEFT ? 14 :
-		DInfo.direction == Direction::RIGHT ? 15 : 13;
+		DInfo.direction == Direction::DOWN ? 33 :
+		DInfo.direction == Direction::UP ? 34 :
+		DInfo.direction == Direction::LEFT ? 36 :
+		DInfo.direction == Direction::RIGHT ? 35 : 33;
 	// Les lignes pour l'état de course sont différentes pour chaque direction
 	rows.runningRow =
-		DInfo.direction == Direction::DOWN ? 13 :
-		DInfo.direction == Direction::UP ? 16 :
-		DInfo.direction == Direction::LEFT ? 14 :
-		DInfo.direction == Direction::RIGHT ? 15 : 13;
+		DInfo.direction == Direction::DOWN ? 29 :
+		DInfo.direction == Direction::UP ? 30 :
+		DInfo.direction == Direction::LEFT ? 32 :
+		DInfo.direction == Direction::RIGHT ? 31 : 29;
 	// Les lignes pour l'état idle sont différentes pour chaque direction
 	rows.idleRow =
-		DInfo.direction == Direction::DOWN ? 9 :
-		DInfo.direction == Direction::UP ? 10 :
-		DInfo.direction == Direction::LEFT ? 12 :
-		DInfo.direction == Direction::RIGHT ? 11 : 9;
+		DInfo.direction == Direction::DOWN ? 25 :
+		DInfo.direction == Direction::UP ? 26 :
+		DInfo.direction == Direction::LEFT ? 28 :
+		DInfo.direction == Direction::RIGHT ? 27 : 25;
+
+	// Les lignes pour l'état de dommage sont différentes pour chaque direction
+	rows.damagedRow =
+		DInfo.direction == Direction::DOWN ? 21 :
+		DInfo.direction == Direction::UP ? 22 :
+		DInfo.direction == Direction::LEFT ? 24 :
+		DInfo.direction == Direction::RIGHT ? 23 : 21;
+
+	// Les lignes pour l'état de mort sont différentes pour chaque direction
+	rows.deadRow =
+		DInfo.direction == Direction::DOWN ? 13 :
+		DInfo.direction == Direction::UP ? 14 :
+		DInfo.direction == Direction::LEFT ? 16 :
+		DInfo.direction == Direction::RIGHT ? 15 : 13;
 
 	// Soustraire 1 à chaque ligne pour correspondre à l'index de la texture (commence à 0)
 	if (rows.attackingRow > 0)
@@ -324,6 +359,10 @@ void Player::handleRows(DirectionInfo& DInfo, SpriteRows& rows) const {
 		rows.runningRow -= 1;
 	if (rows.idleRow > 0)
 		rows.idleRow -= 1;
+	if (rows.damagedRow > 0)
+		rows.damagedRow -= 1;
+	if (rows.deadRow > 0)
+		rows.deadRow -= 1;
 }
 
 //===============================
@@ -343,9 +382,9 @@ void Player::resetPlayer(bool animationChanged, sf::Sprite& sprite, SpriteRows r
 		else if (playerState.state == PlayerState::ATTACKING)
 			reset.resetAnimation(rectSource, rows.attackingRow);
 		else if (playerState.state == PlayerState::DAMAGED)
-			reset.resetAnimation(rectSource, 0);
+			reset.resetAnimation(rectSource, rows.damagedRow);
 		else if (playerState.state == PlayerState::DEAD)
-			reset.resetAnimation(rectSource, 1);
+			reset.resetAnimation(rectSource, rows.deadRow);
 
 		sprite.setTextureRect(rectSource);
 

@@ -158,7 +158,7 @@
     <ClInclude Include="TileMap.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Assets\adventurer.png" />
+    <Image Include="Assets\adventurerFull.png" />
     <Image Include="Assets\Ground.png" />
     <Image Include="Assets\player.png" />
     <Image Include="Assets\playerCharacter.png" />

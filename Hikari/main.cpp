@@ -53,16 +53,16 @@ int main()
 	sf::Texture texture;
 	sf::Sprite sprite(texture);
 
-	Player playerCharacter(texture, sprite, "Assets/adventurer.png", 96, 80);
+	Player playerCharacter(texture, sprite, "Assets/adventurerFull.png", 96, 80);
 	playerCharacter.initialState("Sid");
-
+	
 	//===============================
 	// Création du sprite et de la texture du personnage de test
 	//===============================
 	sf::Texture testTexture;
 	sf::Sprite testSprite(testTexture);
 
-	Player testCharacter(testTexture, testSprite, "Assets/adventurer.png", 96, 80);
+	Player testCharacter(testTexture, testSprite, "Assets/adventurerFull.png", 96, 80);
 	testCharacter.initialState("Test");
 	testCharacter.setPlayerPosition(testSprite, 200.f, 200.f);
 

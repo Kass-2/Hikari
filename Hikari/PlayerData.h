@@ -134,4 +134,6 @@ struct SpriteRows
 	int walkingRow;
 	int runningRow;
 	int attackingRow;
+	int damagedRow;
+	int deadRow;
 };
