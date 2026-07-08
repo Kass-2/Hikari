@@ -84,6 +84,11 @@ public:
 	//===============================
 	void UnlockPlayer() { lock = false; }
 
+	//===============================
+	// Réinitialisation les états du joueur
+	//===============================
+	void resetInputs();
+
 private:
 	//===============================
 	// Gestion des entrées clavier pour déplacer le joueur et changer son état

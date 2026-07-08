@@ -1,11 +1,9 @@
 ### What I need to do in the game (Ideas and tasks)
-1. Continue the menu implimentation.
-
 2. I need to continue adding the different sprites to the game for the main character.
 
 3. I need to create the attack hitbox for the main character.
 
-4. I should use this font in my game to have a criptic text kinda feel to it. The font is called "Noto Sans Old Turkic" and can be found on font.google.com.
+4. Continue the menu implimentation. (Had the main menu and had the other button and functionality of the menu and pause menu)
 
 ##################################
 
@@ -17,6 +15,8 @@ The name for my game "Hikari" means "light" in Japanese wish is a cultture that 
 
 2. Hyper light Drifter is another inspiration I could look into. The art style and gameplay mechanics of that game could 
 provide some interesting ideas for my own game.
+
+3. I should use this font in my game to have a criptic text kinda feel to it. The font is called "Noto Sans Old Turkic" and can be found on font.google.com.
 
 ## Notes from the autofill AI (Could be interesting to explore)
 She is a character from the game Hollow Knight, and she is known for her ability to hollow out her own body to create powerful attacks.

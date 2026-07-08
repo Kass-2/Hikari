@@ -69,6 +69,24 @@ void Player::setPlayerPosition(sf::Sprite& sprite, float x, float y) {
 	sprite.setPosition({ x, y });
 }
 
+void Player::resetInputs() {
+	// Reset key held flags
+	heldState.leftHeld = false;
+	heldState.rightHeld = false;
+	heldState.upHeld = false;
+	heldState.downHeld = false;
+
+	// Reset attack flags
+	AInfo.attackPressed = false;
+	AInfo.attacking = false;
+
+	// Reset states back to Idle
+	playerState.walk = false;
+	playerState.run = false;
+	playerState.idle = true;
+	playerState.state = PlayerState::IDLE;
+}
+
 sf::FloatRect Player::getHitbox(const sf::Sprite& sprite) const {
 	// Custom hitbox dimensions (change this to fit your sprite)
 	float width = 16.f;

@@ -26,24 +26,40 @@ Camera::Camera(int width, int height,
 }
 
 void Camera::clamped(const Player& player, const sf::Sprite& sprite) {
-	
-	sf::Vector2f playerPos = player.getPosition(sprite);
+    sf::Vector2f playerPos = player.getPosition(sprite);
 
-	// Taille de la caméra divisée par 2
-	float halfWidth = camera.getSize().x / 2.f;
-	float halfHeight = camera.getSize().y / 2.f;
+    float halfWidth = camera.getSize().x / 2.f;
+    float halfHeight = camera.getSize().y / 2.f;
 
-	// Limites de la carte en pixels
-	float minX = halfWidth;
-	float maxX = (MAP_WIDTH * TILE_SIZE) - halfWidth;
-	float minY = halfHeight;
-	float maxY = (MAP_HEIGHT * TILE_SIZE) - halfHeight;
+    float mapWidthPixels = MAP_WIDTH * TILE_SIZE;
+    float mapHeightPixels = MAP_HEIGHT * TILE_SIZE;
 
-	// Clamping de la position de la caméra pour qu'elle reste dans la carte
-	float clampedX = std::clamp(playerPos.x, minX, maxX);
-	float clampedY = std::clamp(playerPos.y, minY, maxY);
+    float clampedX = playerPos.x;
+    float clampedY = playerPos.y;
 
-	camera.setCenter({ clampedX, clampedY });
+    // Clamp on X axis only if the map is wider than the camera view
+    if (mapWidthPixels > camera.getSize().x) {
+        float minX = halfWidth;
+        float maxX = mapWidthPixels - halfWidth;
+        clampedX = std::clamp(playerPos.x, minX, maxX);
+    }
+    else {
+        // Map is smaller than camera: center the camera on the map
+        clampedX = mapWidthPixels / 2.f;
+    }
+
+    // Clamp on Y axis only if the map is taller than the camera view
+    if (mapHeightPixels > camera.getSize().y) {
+        float minY = halfHeight;
+        float maxY = mapHeightPixels - halfHeight;
+        clampedY = std::clamp(playerPos.y, minY, maxY);
+    }
+    else {
+        // Map is smaller than camera: center the camera on the map
+        clampedY = mapHeightPixels / 2.f;
+    }
+
+    camera.setCenter({ clampedX, clampedY });
 }
 
 void Camera::follow(const Player& player, const sf::Sprite& sprite) {

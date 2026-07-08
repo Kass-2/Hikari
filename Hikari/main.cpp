@@ -56,10 +56,14 @@ sf::Color TRANSPARENT_WHITE(255, 255, 255, 128);
 //===============================
 const int WINDOW_WIDTH = 960;
 const int WINDOW_HEIGHT = 576;
+//const int WINDOW_WIDTH = 1440;
+//const int WINDOW_HEIGHT = 864;
 const int TILE_SIZE = 32;
 
 const int MAP_WIDTH = WINDOW_WIDTH / TILE_SIZE;   // Nombre de tuiles en largeur
 const int MAP_HEIGHT = WINDOW_HEIGHT / TILE_SIZE; // Nombre de tuiles en hauteur
+//const int MAP_WIDTH = 30;   // Nombre de tuiles en largeur
+//const int MAP_HEIGHT = 18; // Nombre de tuiles en hauteur
 const int MAX_TILES = MAP_WIDTH * MAP_HEIGHT;     // Nombre total de tuiles dans la carte
 
 int main()
@@ -68,6 +72,7 @@ int main()
 	// Creation de la fenêtre de jeu
 	//===============================
     sf::RenderWindow window(sf::VideoMode({ WINDOW_WIDTH, WINDOW_HEIGHT }), "Hikari");
+	//sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Hikari", sf::Style::Default, sf::State::Fullscreen);
 	//window.setFramerateLimit(60);
 	window.setVerticalSyncEnabled(true);
 
@@ -118,7 +123,7 @@ int main()
 		}
 
 		// Configuration du texte à l'intérieur du bouton
-		button.text = sf::Text(font, pauseLabels[i], 15);
+		button.text = sf::Text(font, pauseLabels[i], 14);
 		button.text.setFillColor(sf::Color::Black);
 
 		// Centrer le texte verticalement à l'intérieur du rectangle
@@ -223,7 +228,11 @@ int main()
 			if (currentGameState == GameState::Playing) {
 				if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
 					if (keyPressed->code == sf::Keyboard::Key::Escape) {
-						currentGameState = GameState::PauseMenu; // Pause the game
+						// Arreter le jeu et passer au menu de pause
+						currentGameState = GameState::PauseMenu;
+						
+						// Réinitialiser les entrées du joueur pour éviter les mouvements pendant le menu de pause
+						playerCharacter.resetInputs();				
 					}
 				}
 			}
@@ -273,8 +282,8 @@ int main()
 
 			if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
 				if (keyPressed->code == sf::Keyboard::Key::H &&
-					keyPressed->code == sf::Keyboard::Key::LShift &&
-					keyPressed->code == sf::Keyboard::Key::LControl) {
+					keyPressed->shift &&
+					keyPressed->control) {
 					showHitboxes = !showHitboxes;
 				}
 			}
@@ -284,8 +293,12 @@ int main()
 			}*/
 
 			miniMap.handleEvent(*event);
-			playerCharacter.handleEvent(*event);
-			testCharacter.handleEvent(*event);
+
+			// Pour éviter que le joueur ne se déplace lorsqu'il est dans le menu de pause
+			if (currentGameState == GameState::Playing) {
+				playerCharacter.handleEvent(*event);
+				testCharacter.handleEvent(*event);
+			}
         }
 
 		sf::FloatRect playerHitbox;
@@ -363,16 +376,6 @@ int main()
 				}
 			}
 		}
-
-		// À supprimer
-		/*if (currentGameState == GameState::PauseMenu) {
-			for (int i = 0; i < MENU_ITEM_COUNT; i++) {
-				window.draw(pauseMenu[i]);
-			}
-		}
-		else if (currentGameState == GameState::Playing) {
-			window.draw(gameText);
-		}*/
 
         window.display();
     }
