@@ -75,16 +75,6 @@ void Player::resetInputs() {
 	heldState.rightHeld = false;
 	heldState.upHeld = false;
 	heldState.downHeld = false;
-
-	// Reset attack flags
-	AInfo.attackPressed = false;
-	AInfo.attacking = false;
-
-	// Reset states back to Idle
-	playerState.walk = false;
-	playerState.run = false;
-	playerState.idle = true;
-	playerState.state = PlayerState::IDLE;
 }
 
 sf::FloatRect Player::getHitbox(const sf::Sprite& sprite) const {

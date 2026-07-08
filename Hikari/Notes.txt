@@ -1,4 +1,6 @@
 ### What I need to do in the game (Ideas and tasks)
+1. I need to continue the handling of the different animations like when the player gets hit, he continues to move and also, when I press others inputs to move the animations still continues.
+
 2. I need to continue adding the different sprites to the game for the main character.
 
 3. I need to create the attack hitbox for the main character.
