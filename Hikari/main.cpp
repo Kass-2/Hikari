@@ -20,12 +20,36 @@
 #include <algorithm>
 #include <functional>
 #include <vector>
+#include <SFML/Graphics.hpp>
+#include <optional>
+#include <SFML/System/Clock.hpp>
 
 // Structure pour stocker les éléments à rendre avec leur position Y
 struct RenderItem {
 	float y;
 	std::function<void()> drawCall;
 };
+
+// Énumération pour les états du jeu
+enum class GameState {
+	Menu,
+	PauseMenu,
+	Playing
+};
+
+// Structure pour stocker les éléments du menu
+struct MenuButton {
+	sf::RectangleShape background;
+	sf::Text text;
+
+	MenuButton(const sf::Font& font) : text(font) {}
+};
+
+//===============================
+// Constantes de couleurs
+//===============================
+sf::Color WHITE_LESS(224, 224, 224);
+sf::Color TRANSPARENT_WHITE(255, 255, 255, 128);
 
 //===============================
 // Constantes pour la taille des tuiles et les dimensions de la carte
@@ -46,6 +70,62 @@ int main()
     sf::RenderWindow window(sf::VideoMode({ WINDOW_WIDTH, WINDOW_HEIGHT }), "Hikari");
 	//window.setFramerateLimit(60);
 	window.setVerticalSyncEnabled(true);
+
+	//===============================
+	// Création du menu principal
+	//===============================
+
+	// Police pour le texte du menu
+	sf::Font font;
+	if (!font.openFromFile("Assets/PressStart2P-Regular.ttf"))
+	{
+		std::cerr << "Erreur lors du chargement de la police de texte" << std::endl;
+		return -1;
+	}
+
+	std::vector<std::string> pauseLabels = {
+		"RESUME", "SETTINGS", "EXIT TO MAIN MENU",
+	};
+
+	std::vector<MenuButton> pauseMenu;
+	int selectedPauseIndex = 0;
+
+	float startX = 20.f;
+	float startY = 100.f;
+	float buttonWidth = 300.f;
+	float buttonHeight = 40.f;
+	float spacing = 10.f;
+
+	// En-tête "PAUSE MENU"
+	sf::Text pauseHeader(font, "PAUSE MENU", 20);
+	pauseHeader.setFillColor(sf::Color::Black);
+	pauseHeader.setPosition({ (startX * 1.5f), 60.f });
+
+	// Génération les boutons du menu de pause
+	for (size_t i = 0; i < pauseLabels.size(); ++i) {
+		MenuButton button(font);
+
+		// Configuration du fond du bouton
+		button.background.setSize({ buttonWidth, buttonHeight });
+		button.background.setPosition({ startX, startY + i * (buttonHeight + spacing) });
+
+		// Remplissage du texte des boutons
+		if (i == 0) {
+			button.background.setFillColor(sf::Color::Red);
+		}
+		else {
+			button.background.setFillColor(sf::Color(WHITE_LESS));
+		}
+
+		// Configuration du texte à l'intérieur du bouton
+		button.text = sf::Text(font, pauseLabels[i], 15);
+		button.text.setFillColor(sf::Color::Black);
+
+		// Centrer le texte verticalement à l'intérieur du rectangle
+		button.text.setPosition({ startX + 15.f, startY + i * (buttonHeight + spacing) + 12.f });
+
+		pauseMenu.push_back(button);
+	}
 
 	//===============================
 	// Création du sprite et de la texture du joueur
@@ -106,6 +186,9 @@ int main()
 		return -1;
 	}
 
+	//===============================
+	// Variables pour la boucle principale du jeu
+	//===============================
 	std::vector<Player> players;
 
 	// Horloge pour gérer le temps écoulé entre les mises à jour
@@ -113,6 +196,9 @@ int main()
 
 	// Variable pour afficher ou non les hitboxes des personnages
 	bool showHitboxes = false;
+
+	// Variable pour gérer l'état du jeu (menu de pause ou en cours de jeu)
+	GameState currentGameState = GameState::Playing;
 
 	//===============================
 	// Loop principal du jeu
@@ -133,8 +219,62 @@ int main()
             if (event->is<sf::Event::Closed>())
                 window.close();
 
+			// --- GAMEPLAY CONTROLS ---
+			if (currentGameState == GameState::Playing) {
+				if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+					if (keyPressed->code == sf::Keyboard::Key::Escape) {
+						currentGameState = GameState::PauseMenu; // Pause the game
+					}
+				}
+			}
+			// --- PAUSE MENU CONTROLS ---
+			else if (currentGameState == GameState::PauseMenu) {
+
+				// Mouse Hover Logic
+				if (const auto* mouseMoved = event->getIf<sf::Event::MouseMoved>()) {
+					sf::Vector2f mousePos = window.mapPixelToCoords(mouseMoved->position);
+
+					for (size_t i = 0; i < pauseMenu.size(); ++i) {
+						if (pauseMenu[i].background.getGlobalBounds().contains(mousePos)) {
+							// Reset old selected button to default look
+							pauseMenu[selectedPauseIndex].background.setFillColor(sf::Color(WHITE_LESS));
+							pauseMenu[selectedPauseIndex].text.setFillColor(sf::Color::Black);
+
+							// Highlight new hovered button
+							selectedPauseIndex = i;
+							pauseMenu[selectedPauseIndex].background.setFillColor(sf::Color::Red);
+							//pauseMenu[selectedPauseIndex].text.setFillColor(sf::Color::Black);
+						}
+					}
+				}
+
+				// Mouse Click Logic
+				if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>()) {
+					if (mousePressed->button == sf::Mouse::Button::Left) {
+						sf::Vector2f mousePos = window.mapPixelToCoords(mousePressed->position);
+
+						for (size_t i = 0; i < pauseMenu.size(); ++i) {
+							if (pauseMenu[i].background.getGlobalBounds().contains(mousePos)) {
+								if (i == 0) currentGameState = GameState::Playing; // Resume
+								else if (i == 3) currentGameState = GameState::Menu; // Main Menu (Implement state as needed)
+								else if (i == 2) window.close(); // Exit
+							}
+						}
+					}
+				}
+
+				// Keyboard Logic (Unpause with ESC)
+				if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+					if (keyPressed->code == sf::Keyboard::Key::Escape) {
+						currentGameState = GameState::Playing;
+					}
+				}
+			}
+
 			if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-				if (keyPressed->code == sf::Keyboard::Key::H) {
+				if (keyPressed->code == sf::Keyboard::Key::H &&
+					keyPressed->code == sf::Keyboard::Key::LShift &&
+					keyPressed->code == sf::Keyboard::Key::LControl) {
 					showHitboxes = !showHitboxes;
 				}
 			}
@@ -148,60 +288,91 @@ int main()
 			testCharacter.handleEvent(*event);
         }
 
-		playerCharacter.update(dt, window, sprite);
-		testCharacter.update(dt, window, testSprite);
+		sf::FloatRect playerHitbox;
+		sf::FloatRect testHitbox;
 
-		// Récupérer les hitboxes des deux personnages pour la détection de collision
-		sf::FloatRect playerHitbox = playerCharacter.getHitbox(sprite);
-		sf::FloatRect testHitbox = testCharacter.getHitbox(testSprite);
+		if (currentGameState == GameState::Playing) {
+			playerCharacter.update(dt, window, sprite);
+			testCharacter.update(dt, window, testSprite);
 
-		// Détection de collision
-		resolveCollision(sprite, playerHitbox, testHitbox);
+			// Récupérer les hitboxes des deux personnages pour la détection de collision
+			playerHitbox = playerCharacter.getHitbox(sprite);
+			testHitbox = testCharacter.getHitbox(testSprite);
 
-		// Mettre à jour la position de la caméra pour suivre le joueur
-		playerCamera.follow(playerCharacter, sprite);
-		playerCamera.clamped(playerCharacter, sprite);
+			// Détection de collision
+			resolveCollision(sprite, playerHitbox, testHitbox);
 
-		// Pour le rendu, on efface la fenêtre avec une couleur de fond gris foncé
-        window.clear(sf::Color(50,50,50));
-
-		// Appliquer la vue de la caméra à la fenêtre
-		playerCamera.apply(window);
-
-		window.draw(tileMap);
-
-		std::vector<RenderItem> renderQueue;
-
-		renderQueue.push_back({ sprite.getPosition().y, [&]() 
-			{ playerCharacter.draw(window, sprite); } });
-		renderQueue.push_back({ testSprite.getPosition().y, [&]() 
-			{ testCharacter.draw(window, testSprite); } });
-
-		// TODO : Ajouter d'autres éléments à la file d'attente de rendu si nécessaire
-
-		// Trier par la position Y des éléments
-		std::sort(renderQueue.begin(), renderQueue.end(), [](const RenderItem& a, const RenderItem& b) 
-			{
-				return a.y < b.y;
-			});
-
-		// Dessiner les éléments dans l'ordre trié
-		for (const auto& item : renderQueue) {
-			item.drawCall();
+			// Mettre à jour la position de la caméra pour suivre le joueur
+			playerCamera.follow(playerCharacter, sprite);
+			playerCamera.clamped(playerCharacter, sprite);
 		}
 
-		// testCharacter.draw(window, testSprite);
-		// playerCharacter.draw(window, sprite);
+		// Pour le rendu, on efface la fenêtre avec une couleur noire
+        window.clear(sf::Color::Black);
 
-		// Dessiner les hitboxes si l'option est activée
-		if (showHitboxes) {
-			drawHitboxOutline(window, playerHitbox);
-			drawHitboxOutline(window, testHitbox);
+		if (currentGameState == GameState::Playing || currentGameState == GameState::PauseMenu) {
+			// Appliquer la vue de la caméra à la fenêtre
+			playerCamera.apply(window);
+
+			window.draw(tileMap);
+
+			std::vector<RenderItem> renderQueue;
+
+			renderQueue.push_back({ sprite.getPosition().y, [&]()
+				{ playerCharacter.draw(window, sprite); } });
+			renderQueue.push_back({ testSprite.getPosition().y, [&]()
+				{ testCharacter.draw(window, testSprite); } });
+
+			// TODO : Ajouter d'autres éléments à la file d'attente de rendu si nécessaire
+
+			// Trier par la position Y des éléments
+			std::sort(renderQueue.begin(), renderQueue.end(), [](const RenderItem& a, const RenderItem& b)
+				{
+					return a.y < b.y;
+				});
+
+			// Dessiner les éléments dans l'ordre trié
+			for (const auto& item : renderQueue) {
+				item.drawCall();
+			}
+
+			// testCharacter.draw(window, testSprite);
+			// playerCharacter.draw(window, sprite);
+
+			// Dessiner les hitboxes si l'option est activée
+			if (showHitboxes) {
+				drawHitboxOutline(window, playerHitbox);
+				drawHitboxOutline(window, testHitbox);
+			}
+
+			miniMap.draw(window, tileMap, playerCharacter, sprite, testCharacter, testSprite);
+
+			applyCameraUI(window);
+
+			if (currentGameState == GameState::PauseMenu) {
+				// Draw a dark full-screen overlay to dim the game world
+				sf::RectangleShape dimOverlay(sf::Vector2f(1920.f, 1080.f));
+				dimOverlay.setFillColor(sf::Color(0, 0, 0, 150)); // Alpha 150 dims background
+				window.draw(dimOverlay);
+
+				// Draw Pause Menu UI elements
+				window.draw(pauseHeader);
+				for (const auto& button : pauseMenu) {
+					window.draw(button.background);
+					window.draw(button.text);
+				}
+			}
 		}
 
-		miniMap.draw(window, tileMap, playerCharacter, sprite, testCharacter, testSprite);
-		
-		applyCameraUI(window);
+		// À supprimer
+		/*if (currentGameState == GameState::PauseMenu) {
+			for (int i = 0; i < MENU_ITEM_COUNT; i++) {
+				window.draw(pauseMenu[i]);
+			}
+		}
+		else if (currentGameState == GameState::Playing) {
+			window.draw(gameText);
+		}*/
 
         window.display();
     }

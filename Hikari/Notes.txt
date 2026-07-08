@@ -1,5 +1,13 @@
-### Where I am at in my game project
-Continue the sprites sheet for the main character and after do the attack hitbox.
+### What I need to do in the game (Ideas and tasks)
+1. Continue the menu implimentation.
+
+2. I need to continue adding the different sprites to the game for the main character.
+
+3. I need to create the attack hitbox for the main character.
+
+4. I should use this font in my game to have a criptic text kinda feel to it. The font is called "Noto Sans Old Turkic" and can be found on font.google.com.
+
+##################################
 
 # Notes for my game project "Hikari"
 The name for my game "Hikari" means "light" in Japanese wish is a cultture that I am interested in and want to incorporate into my game.
