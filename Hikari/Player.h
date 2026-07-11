@@ -60,6 +60,16 @@ public:
 	void initialState(std::string);
 
 	//===============================
+	// Getter pour la santé actuelle du joueur
+	//===============================
+	float getHealth() const;
+
+	//===============================
+	// Getter pour la santé maximale du joueur
+	//===============================
+	float getMaxHealth() const;
+
+	//===============================
 	// Gestion des événements clavier pour mettre à jour les booléens correspondants aux touches pressées ou relâchées
 	//===============================
 	void handleEvent(const sf::Event& event);
@@ -99,6 +109,21 @@ private:
 	// Mise à jour de l'animation du joueur en fonction de son état et de sa direction
 	//===============================
 	void updateAnimation(float deltaTime, sf::Sprite& sprite);
+
+	//===============================
+	// Gestion des frames de l'animation du joueur en fonction de son état
+	//===============================
+	void PlayerFrameAnimation();
+
+	//===============================
+	// Détermination du temps entre les frames et du nombre de frames en fonction de l'état du joueur
+	//===============================
+	void StateFrameTime(const float frameTime, const int maxFrames);
+
+	//===============================
+	// Détermination de la ligne de la texture à utiliser en fonction de l'état du joueur
+	//===============================
+	void currentLineTexture(int& targetRow) const;
 
 	//===============================
 	// Mise à jour de l'état du joueur en fonction des booléens

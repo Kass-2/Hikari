@@ -110,9 +110,9 @@ sf::Vector2f InputManager::handleMovement(
 
 	bool moving = (movement.x != 0.f || movement.y != 0.f);
 
-	playerState.run = moving && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift);
+	playerState.run = moving && playerState.run;
 
-	playerState.walk = moving && !playerState.run;
+	playerState.walk = moving && (playerState.run == false);
 
 	playerState.idle = !moving && !AInfo.attacking;
 
@@ -203,6 +203,10 @@ void InputManager::handleEvent(const sf::Event& event,
 		case sf::Keyboard::Key::Down:
 			heldState.downHeld = false;
 			break;
+			// Si le joueur est en train de courir, on le fait marcher, sinon on le fait courir
+		case sf::Keyboard::Key::LShift:
+			playerState.run = !playerState.run;
+			break;
 			// Touches d'attaque (espace ou entrée)
 		case sf::Keyboard::Key::Space:
 		case sf::Keyboard::Key::Enter:
@@ -219,6 +223,9 @@ void InputManager::handleEvent(const sf::Event& event,
 			// Touche de test pour tuer le joueur (à supprimer plus tard)
 		case sf::Keyboard::Key::L:
 			playerState.dead = true;
+			break;
+		case sf::Keyboard::Key::H :
+			playerState.healing = true;
 			break;
 		case sf::Keyboard::Key::I:
 			inventory = !inventory; // Toggle inventory

@@ -101,9 +101,17 @@ void Player::initialState(std::string characterName) {
 	player.speed = (1.25f * 60);
 }
 
+float Player::getHealth() const {
+	return player.health;
+}
+
+float Player::getMaxHealth() const {
+	return player.maxHealth;
+}
+
 void Player::handleInput(sf::Sprite& sprite, float dt) {
 	// Si le mouvement du joueur est verrouillé ou s'il est mort, on ne gère pas les entrées clavier
-	if (lock || playerState.dead) return;
+	if (lock || playerState.dead || playerState.damaged || playerState.healing) return;
 
 	// Vecteur de mouvement du joueur en fonction des entrées clavier
 	sf::Vector2f movement = { 0.f, 0.f };
@@ -163,20 +171,8 @@ void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 	// Determiner les lignes de la texture pour chaque état du joueur en fonction de la direction du joueur
 	handleRows(DInfo, rows);
 
-	// Déterminer la ligne cible dans la feuille de sprites pour l'état actuel
 	int targetRow = 0;
-	if (playerState.state == PlayerState::IDLE)
-		targetRow = rows.idleRow;
-	else if (playerState.state == PlayerState::WALKING)
-		targetRow = rows.walkingRow;
-	else if (playerState.state == PlayerState::RUNNING)
-		targetRow = rows.runningRow;
-	else if (playerState.state == PlayerState::ATTACKING)
-		targetRow = rows.attackingRow;
-	else if (playerState.state == PlayerState::DAMAGED)
-		targetRow = rows.damagedRow;
-	else if (playerState.state == PlayerState::DEAD)
-		targetRow = rows.deadRow;
+	currentLineTexture(targetRow);
 
 	// Vérifier si la ligne de la texture a changé
 	bool rowChanged = !AInfo.attacking && (rectSource.position.y != targetRow * fH);
@@ -187,43 +183,11 @@ void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 		|| (!AInfo.attacking && DInfo.direction != DInfo.previousDirection)
 		|| rowChanged;
 
-	//// Déterminer si l'animation doit être réinitialisée en fonction du changement d'état ou de direction du joueur
-	//bool animationChanged =
-	//	(playerState.state != playerState.previousState)
-	//	|| (!AInfo.attacking && DInfo.direction != DInfo.previousDirection);
-
 	// Déterminer la ligne de la texture à utiliser en fonction de l'état du joueur
 	resetPlayer(animationChanged, sprite, rows, playerAnimation);
 
-	// Déterminer le temps entre les frames et le nombre de frames en fonction de l'état du joueur
-	if (playerState.state == PlayerState::RUNNING) {
-		playerFrames.ft = 0.07f;
-		playerFrames.mf = 8;
-	}
-	else if (playerState.state == PlayerState::WALKING) {
-		playerFrames.ft = 0.1f;
-		playerFrames.mf = 8;
-	}
-	else if (playerState.state == PlayerState::ATTACKING) {
-		playerFrames.ft = 0.06f;
-		playerFrames.mf = 8;
-	}
-	else if (playerState.state == PlayerState::IDLE) {
-		playerFrames.ft = 0.2f;
-		playerFrames.mf = 8;
-	}
-	else if (playerState.state == PlayerState::DAMAGED) {
-		playerFrames.ft = 0.05f;
-		playerFrames.mf = 4;
-	}
-	else if (playerState.state == PlayerState::DEAD) {
-		playerFrames.ft = 0.1f;
-		playerFrames.mf = 7;
-	}
-	else {
-		playerFrames.ft = 0.3f;
-		playerFrames.mf = 8;
-	}
+	// Mettre à jour les frames de l'animation du joueur en fonction de son état
+	PlayerFrameAnimation();
 
 	// Mettre à jour l'animation du joueur en fonction du temps écoulé
 	if (animationClock.getElapsedTime().asSeconds() >= playerFrames.ft) {
@@ -280,8 +244,13 @@ void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 			}
 			else if (playerState.state == PlayerState::DAMAGED)
 			{
+				// Réinitialiser l'état de dommage après l'animation
+				playerState.damaged = false;
+
 				rectSource.position.x = 0;
-				playerState.damaged = false; // Réinitialiser l'état de dommage après l'animation
+				
+				// Revenir à l'état idle après l'animation de dommage
+				playerState.state = PlayerState::IDLE;
 			}
 			else if (playerState.state == PlayerState::ATTACKING)
 			{
@@ -290,7 +259,18 @@ void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 
 				rectSource.position.x = 0;
 
-				playerState.state = PlayerState::IDLE; // Revenir à l'état idle après l'animation d'attaque
+				// Revenir à l'état idle après l'animation d'attaque
+				playerState.state = PlayerState::IDLE;
+			}
+			else if (playerState.state == PlayerState::HEALING)
+			{
+				// Réinitialiser l'état de soin après l'animation
+				playerState.healing = false;
+
+				rectSource.position.x = 0;
+
+				// Revenir à l'état idle après l'animation de soin
+				playerState.state = PlayerState::IDLE;
 			}
 			else
 			{
@@ -303,9 +283,69 @@ void Player::updateAnimation(float deltaTime, sf::Sprite& sprite) {
 	playerFrames.pf = playerFrames.cf;
 }
 
+void Player::PlayerFrameAnimation() {
+	switch (playerState.state) {
+		case PlayerState::RUNNING:
+			// Animation pour l'état de course
+			StateFrameTime(0.05, 8);
+			break;
+		case PlayerState::WALKING:
+			// Animation pour l'état de marche
+			StateFrameTime(0.1f, 8);
+			break;
+		case PlayerState::ATTACKING:
+			// Animation pour l'état d'attaque
+			StateFrameTime(0.05, 8);
+			break;
+		case PlayerState::IDLE:
+			// Animation pour l'état idle
+			StateFrameTime(0.2, 8);
+			break;
+		case PlayerState::DAMAGED:
+			// Animation pour l'état de dommage
+			StateFrameTime(0.05, 4);
+			break;
+		case PlayerState::DEAD:
+			// Animation pour l'état de mort
+			StateFrameTime(0.1, 7);
+			break;
+		case PlayerState::HEALING:
+			// Animation pour l'état de soin
+			StateFrameTime(0.1, 8);
+			break;
+	}
+}
+
+void Player::StateFrameTime(const float frameTime, const int maxFrames)
+{
+	// Déterminer le temps entre les frames et le nombre de frames en fonction de l'état du joueur
+	playerFrames.ft = frameTime;
+	playerFrames.mf = maxFrames;
+	
+}
+
+void Player::currentLineTexture(int& targetRow) const
+{
+	if (playerState.state == PlayerState::IDLE)
+		targetRow = rows.idleRow;
+	else if (playerState.state == PlayerState::WALKING)
+		targetRow = rows.walkingRow;
+	else if (playerState.state == PlayerState::RUNNING)
+		targetRow = rows.runningRow;
+	else if (playerState.state == PlayerState::ATTACKING)
+		targetRow = rows.attackingRow;
+	else if (playerState.state == PlayerState::DAMAGED)
+		targetRow = rows.damagedRow;
+	else if (playerState.state == PlayerState::DEAD)
+		targetRow = rows.deadRow;
+	else if (playerState.state == PlayerState::HEALING)
+		targetRow = rows.healingRow;
+}
+
 void Player::handlePlayerState(PlayerStates& playerState, AttackInfo& AInfo) const {
 	if (playerState.dead) playerState.state = PlayerState::DEAD;
 	else if (playerState.damaged) playerState.state = PlayerState::DAMAGED;
+	else if (playerState.healing) playerState.state = PlayerState::HEALING;
 	else if (AInfo.attacking) playerState.state = PlayerState::ATTACKING;
 	else if (playerState.run) playerState.state = PlayerState::RUNNING;
 	else if (playerState.walk) playerState.state = PlayerState::WALKING;
@@ -314,10 +354,10 @@ void Player::handlePlayerState(PlayerStates& playerState, AttackInfo& AInfo) con
 
 void Player::handleRows(DirectionInfo& DInfo, SpriteRows& rows) const {
 	// Déterminer la direction horizontale active en cas de conflit (A et D pressés en même temps)
-	bool isMovingLeft = heldState.leftHeld && (!heldState.rightHeld || DInfo.
+	/*bool isMovingLeft = heldState.leftHeld && (!heldState.rightHeld || DInfo.
 	lastHorizontal == Direction::LEFT);
 	bool isMovingRight = heldState.rightHeld && (!heldState.leftHeld || DInfo.
-		lastHorizontal == Direction::RIGHT);
+		lastHorizontal == Direction::RIGHT);*/
 
 	// Les lignes pour l'état d'attaque sont différentes pour chaque direction
 	rows.attackingRow =
@@ -358,6 +398,13 @@ void Player::handleRows(DirectionInfo& DInfo, SpriteRows& rows) const {
 		DInfo.direction == Direction::LEFT ? 16 :
 		DInfo.direction == Direction::RIGHT ? 15 : 13;
 
+	// Les lignes pour l'état de soin sont différentes pour chaque direction
+	rows.healingRow =
+		DInfo.direction == Direction::DOWN ? 17 :
+		DInfo.direction == Direction::UP ? 18 :
+		DInfo.direction == Direction::LEFT ? 20 :
+		DInfo.direction == Direction::RIGHT ? 19 : 17;
+
 	// Soustraire 1 à chaque ligne pour correspondre à l'index de la texture (commence à 0)
 	if (rows.attackingRow > 0)
 		rows.attackingRow -= 1;
@@ -371,28 +418,49 @@ void Player::handleRows(DirectionInfo& DInfo, SpriteRows& rows) const {
 		rows.damagedRow -= 1;
 	if (rows.deadRow > 0)
 		rows.deadRow -= 1;
+	if (rows.healingRow > 0)
+		rows.healingRow -= 1;
 }
 
-//===============================
-// Fonction pour réinitialiser l'animation du joueur lorsque son état ou sa direction change
-//===============================
 void Player::resetPlayer(bool animationChanged, sf::Sprite& sprite, SpriteRows rows, Animations reset) {
 	// Si l'état du joueur a changé, on réinitialise l'animation
-
 	if (animationChanged)
 	{
+		// Restaurer la santé du joueur si l'état précédent était "mort" et que l'état actuel n'est pas "mort"
+		if (playerState.previousState == PlayerState::DEAD && playerState.state != PlayerState::DEAD)
+			player.health = player.maxHealth;
+
 		if (playerState.state == PlayerState::IDLE)
 			reset.resetAnimation(rectSource, rows.idleRow);
 		else if (playerState.state == PlayerState::WALKING)
 			reset.resetAnimation(rectSource, rows.walkingRow);
 		else if (playerState.state == PlayerState::RUNNING)
 			reset.resetAnimation(rectSource, rows.runningRow);
+		else if (playerState.state == PlayerState::HEALING) 
+		{
+			// Réinitialiser l'animation de soin et augmenter la santé du joueur
+			reset.resetAnimation(rectSource, rows.healingRow);
+			player.health += 10;
+			if (player.health > player.maxHealth) 
+				player.health = player.maxHealth;
+		}
 		else if (playerState.state == PlayerState::ATTACKING)
 			reset.resetAnimation(rectSource, rows.attackingRow);
 		else if (playerState.state == PlayerState::DAMAGED)
+		{
+			// Réinitialiser l'animation de dommage et diminuer la santé du joueur
 			reset.resetAnimation(rectSource, rows.damagedRow);
+			player.health -= 10;
+			if (player.health <= 0.f) {
+				player.health = 0.f;
+				playerState.dead = true;
+			}
+		}
 		else if (playerState.state == PlayerState::DEAD)
+		{
 			reset.resetAnimation(rectSource, rows.deadRow);
+			player.health = 0.f;
+		}
 
 		sprite.setTextureRect(rectSource);
 

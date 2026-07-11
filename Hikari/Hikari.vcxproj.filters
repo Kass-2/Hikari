@@ -63,6 +63,9 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="HealthBar.cpp">
+      <Filter>Source Files\Player</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameHeaders.h">
@@ -98,25 +101,22 @@
     <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HealthBar.h">
+      <Filter>Header Files\Player</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Assets\player.png">
-      <Filter>Resource Files\Assets</Filter>
-    </Image>
     <Image Include="Assets\Tileset_Grass.png">
       <Filter>Resource Files\Assets</Filter>
     </Image>
     <Image Include="Assets\Ground.png">
       <Filter>Resource Files\Assets</Filter>
     </Image>
-    <Image Include="Assets\playerCharacter.png">
-      <Filter>Resource Files\Assets</Filter>
-    </Image>
-    <Image Include="Assets\villagerCharacter.png">
-      <Filter>Resource Files\Assets</Filter>
-    </Image>
     <Image Include="Assets\adventurerFull.png">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Assets\PlayerCharacter</Filter>
+    </Image>
+    <Image Include="Assets\player.png">
+      <Filter>Resource Files\Assets\PlayerCharacter</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

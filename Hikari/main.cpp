@@ -12,6 +12,7 @@
 #include <iostream>
 #include "MapData.h"
 #include "MiniMap.h"
+#include "HealthBar.h"
 #include "Camera.h"
 #include "HitBox.h"
 #include <SFML/Graphics/Color.hpp>
@@ -158,6 +159,11 @@ int main()
 	// Création de la caméra
 	//===============================
 	Camera playerCamera(WINDOW_WIDTH, WINDOW_HEIGHT, MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, 0.7f);
+
+	//=================================
+	// Création de la barre de vie du joueur
+	//=================================
+	HealthBar playerHealthBar("Assets/healthBarContainer.png", 32, 48, 8, "Assets/fireHealthBar.png", 32, 48, 8, 0.1f);
 
 	//===============================
 	// Création de la mini-carte
@@ -308,6 +314,8 @@ int main()
 			playerCharacter.update(dt, window, sprite);
 			testCharacter.update(dt, window, testSprite);
 
+			playerHealthBar.update(playerCharacter.getHealth(), playerCharacter.getMaxHealth(), dt);
+
 			// Récupérer les hitboxes des deux personnages pour la détection de collision
 			playerHitbox = playerCharacter.getHitbox(sprite);
 			testHitbox = testCharacter.getHitbox(testSprite);
@@ -323,6 +331,7 @@ int main()
 		// Pour le rendu, on efface la fenêtre avec une couleur noire
         window.clear(sf::Color::Black);
 
+		// Pour le rendu, on vérifie si le jeu est en cours ou en pause pour dessiner les éléments du jeu
 		if (currentGameState == GameState::Playing || currentGameState == GameState::PauseMenu) {
 			// Appliquer la vue de la caméra à la fenêtre
 			playerCamera.apply(window);
@@ -349,14 +358,16 @@ int main()
 				item.drawCall();
 			}
 
-			// testCharacter.draw(window, testSprite);
-			// playerCharacter.draw(window, sprite);
-
 			// Dessiner les hitboxes si l'option est activée
 			if (showHitboxes) {
 				drawHitboxOutline(window, playerHitbox);
 				drawHitboxOutline(window, testHitbox);
 			}
+			
+			// Reset view to default for UI rendering)
+			window.setView(window.getDefaultView()); 
+
+			playerHealthBar.draw(window, { 20.f, 20.f });
 
 			miniMap.draw(window, tileMap, playerCharacter, sprite, testCharacter, testSprite);
 

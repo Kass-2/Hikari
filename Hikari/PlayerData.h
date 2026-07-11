@@ -27,6 +27,7 @@ enum class PlayerState
 	WALKING,
 	RUNNING,
 	ATTACKING,
+	HEALING
 };
 
 // Enumération pour les différentes entrées clavier
@@ -51,10 +52,12 @@ struct PlayerStates
 {
 	bool damaged = false;
 	bool dead = false;
+	bool revived = false;
 	bool walk = false;
 	bool idle = false;
 	bool run = false;
 	bool attack = false;
+	bool healing = false;
 
 	// État actuel du joueur
 	PlayerState state = PlayerState::IDLE;
@@ -136,4 +139,5 @@ struct SpriteRows
 	int attackingRow;
 	int damagedRow;
 	int deadRow;
+	int healingRow;
 };

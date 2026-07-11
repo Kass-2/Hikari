@@ -136,6 +136,7 @@
   <ItemGroup>
     <ClCompile Include="Animations.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="HealthBar.cpp" />
     <ClCompile Include="HitBox.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="MapData.cpp" />
@@ -149,6 +150,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="GameHeaders.h" />
+    <ClInclude Include="HealthBar.h" />
     <ClInclude Include="HitBox.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="MapData.h" />
@@ -161,9 +163,7 @@
     <Image Include="Assets\adventurerFull.png" />
     <Image Include="Assets\Ground.png" />
     <Image Include="Assets\player.png" />
-    <Image Include="Assets\playerCharacter.png" />
     <Image Include="Assets\Tileset_Grass.png" />
-    <Image Include="Assets\villagerCharacter.png" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Notes.txt" />
