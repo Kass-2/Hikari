@@ -1,11 +1,13 @@
 ### What I need to do in the game (Ideas and tasks)
-1. I need to continue the handling of the different animations like when the player gets hit, he continues to move and also, when I press others inputs to move the animations still continues.
+- Continue the menu implimentation. (Had the main menu and had the other button and functionality of the menu and pause menu)
 
-2. I need to continue adding the different sprites to the game for the main character.
+- I need to do a mob class to be able to had different enemies.
 
-3. I need to create the attack hitbox for the main character.
+- I need to do the implimentation of the enemies hitboxes.
 
-4. Continue the menu implimentation. (Had the main menu and had the other button and functionality of the menu and pause menu)
+- Had the class fore area detections of the enemies.
+
+- Do the entire Slime boss. Wish are implimenting the animations, his hitboxes, his attack hitboxes, area of detection before attacking
 
 ##################################
 
