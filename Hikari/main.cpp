@@ -313,12 +313,12 @@ int main()
 					for (size_t i = 0; i < pauseMenu.size(); ++i) {
 						if (pauseMenu[i].background.getGlobalBounds().contains(mousePos)) {
 							// Reset old selected button to default look
-							pauseMenu[selectedPauseIndex].background.setFillColor(sf::Color(WHITE_LESS));
+							pauseMenu[selectedPauseIndex].background.setFillColor(sf::Color::Transparent);
 							pauseMenu[selectedPauseIndex].text.setFillColor(sf::Color::Black);
 
 							// Highlight new hovered button
 							selectedPauseIndex = i;
-							pauseMenu[selectedPauseIndex].background.setFillColor(sf::Color::Red);
+							pauseMenu[selectedPauseIndex].background.setFillColor(sf::Color::Transparent);
 							//pauseMenu[selectedPauseIndex].text.setFillColor(sf::Color::Black);
 						}
 					}
@@ -332,12 +332,36 @@ int main()
 						for (size_t i = 0; i < pauseMenu.size(); ++i) {
 							if (pauseMenu[i].background.getGlobalBounds().contains(mousePos)) {
 								if (i == 0) currentGameState = GameState::Playing; // Resume
-								else if (i == 3) currentGameState = GameState::Menu; // Main Menu (Implement state as needed)
-								else if (i == 2) window.close(); // Exit
+								else if (i == 1) window.close(); // Exit (TODO : change it because it supposed to be settings)
+								else if (i == 2) currentGameState = GameState::Menu; // Go to main menu
 							}
 						}
 					}
 				}
+
+				if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+                    if (keyPressed->code == sf::Keyboard::Key::Up) {
+                        if (selectedPauseIndex - 1 >= 0) {
+                            menu[selectedPauseIndex].setFillColor(sf::Color::White);
+                            selectedItemIndex--;
+                            menu[selectedPauseIndex].setFillColor(sf::Color::Red);
+                        }
+                    } 
+                    else if (keyPressed->code == sf::Keyboard::Key::Down) {
+                        if (selectedItemIndex + 1 < MAX_ITEMS) {
+                            menu[selectedItemIndex].setFillColor(sf::Color::White);
+                            selectedItemIndex++;
+                            menu[selectedItemIndex].setFillColor(sf::Color::Red);
+                        }
+                    } 
+                    else if (keyPressed->code == sf::Keyboard::Key::Enter) { // Return is renamed to Enter in SFML 3
+                        if (selectedItemIndex == 0) {
+                            currentState = GameState::Playing;
+                        } else if (selectedItemIndex == 1) {
+                            window.close();
+                        }
+                    }
+                }
 
 				// Keyboard Logic (Unpause with ESC)
 				if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
