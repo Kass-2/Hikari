@@ -67,6 +67,9 @@ const int MAP_HEIGHT = WINDOW_HEIGHT / TILE_SIZE; // Nombre de tuiles en hauteur
 //const int MAP_HEIGHT = 18; // Nombre de tuiles en hauteur
 const int MAX_TILES = MAP_WIDTH * MAP_HEIGHT;     // Nombre total de tuiles dans la carte
 
+// Police principale du jeu
+const String PressStart2P = "Assets/PressStart2P-Regular.ttf";
+
 int main()
 {
 	//===============================
@@ -80,19 +83,77 @@ int main()
 	//===============================
 	// Création du menu principal
 	//===============================
-
-	// Police pour le texte du menu
-	sf::Font font;
-	if (!font.openFromFile("Assets/PressStart2P-Regular.ttf"))
+	// Police pour le texte du menu principal
+	sf::Font mainMenuFont;
+	if (!mainMenuFont.openFromFile(PressStart2P))
 	{
 		std::cerr << "Erreur lors du chargement de la police de texte" << std::endl;
 		return -1;
 	}
 
+	// Vecteur pour les différents étiquettes du "Main Menu"
+	std::vector<std::string> menuLabels = {
+		"PLAY", "SETTINGS", "CREDITS", "QUIT",
+	};
+
+	// Vecteur pour les différents bouton du "Main Menu"
+	std::vector<MenuButton> mainMenu;
+	int selectedMainIndex = 0;
+
+	float startXMain = 20.f;
+	float startYMain = 600.f;
+	float buttonWidthMain = 100.f;
+	float buttonHeightMain = 20.f;
+	float spacingMain = 10.f;
+
+	// En-tête "MAIN MENU"
+	sf::Text MMHeader(font, "HIKARI", 30);
+	MMHeader.setFillColor(sf::Color(WHITE_LESS));
+	MMHeader.setPosition({ (startXMain * 1.5f), 60.f });
+
+	// Génération les boutons du menu principal
+	for (size_t i = 0; i < menuLabels.size(); ++i) {
+		MenuButton mainButton(mainMenuFont);
+
+		// Configuration de l'arrière du bouton
+		mainButton.background.setSize({ buttonWidthMain, buttonHeightMain });
+		mainButton.background.setPosition({ startXMain, startYMain + i * (buttonHeightMain + spacingMain) });
+
+		// Remplissage du texte des boutons
+		if (i == 0) {
+			mainButton.background.setFillColor(sf::Color::White);
+		}
+		else {
+			mainButton.background.setFillColor(sf::Color::Black);
+		}
+
+		// Configuration du texte à l'intérieur du bouton
+		mainButton.text = sf::Text(font, menuLabels[i], 14);
+		mainButton.text.setFillColor(sf::Color::Black);
+
+		// Centrer le texte verticalement à l'intérieur du rectangle
+		mainButton.text.setPosition({ startXMain + 12.f, startYMain + i * (buttonHeightMain + spacingMain) + 8.f });
+
+		mainMenu.push_back(mainbutton);
+	}
+	
+	//===============================
+	// Création du menu de pause
+	//===============================
+	// Police pour le texte du menu de pause
+	sf::Font font;
+	if (!font.openFromFile(PressStart2P))
+	{
+		std::cerr << "Erreur lors du chargement de la police de texte" << std::endl;
+		return -1;
+	}
+
+	// Vecteur pour les différents étiquettes du "Pause Menu"
 	std::vector<std::string> pauseLabels = {
 		"RESUME", "SETTINGS", "EXIT TO MAIN MENU",
 	};
 
+	// Vecteur pour les différents bouton du "Pause Menu"
 	std::vector<MenuButton> pauseMenu;
 	int selectedPauseIndex = 0;
 
@@ -111,7 +172,7 @@ int main()
 	for (size_t i = 0; i < pauseLabels.size(); ++i) {
 		MenuButton button(font);
 
-		// Configuration du fond du bouton
+		// Configuration de l'arrière du bouton
 		button.background.setSize({ buttonWidth, buttonHeight });
 		button.background.setPosition({ startX, startY + i * (buttonHeight + spacing) });
 
