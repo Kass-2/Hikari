@@ -24,6 +24,7 @@
 #include <SFML/Graphics.hpp>
 #include <optional>
 #include <SFML/System/Clock.hpp>
+#include <string>
 
 // Structure pour stocker les éléments à rendre avec leur position Y
 struct RenderItem {
@@ -50,25 +51,27 @@ struct MenuButton {
 // Constantes de couleurs
 //===============================
 sf::Color WHITE_LESS(224, 224, 224);
-sf::Color TRANSPARENT_WHITE(255, 255, 255, 128);
+sf::Color SUBTLE_WHITE(255, 255, 255, 38);
+sf::Color SUBTLE_BLACK(0, 0, 0, 38);
+sf::Color WHITE_GRAY(86, 86, 86);
 
 //===============================
 // Constantes pour la taille des tuiles et les dimensions de la carte
 //===============================
-const int WINDOW_WIDTH = 960;
-const int WINDOW_HEIGHT = 576;
-//const int WINDOW_WIDTH = 1440;
-//const int WINDOW_HEIGHT = 864;
+//const int WINDOW_WIDTH = 960;
+//const int WINDOW_HEIGHT = 576;
+const int WINDOW_WIDTH = 1440;
+const int WINDOW_HEIGHT = 864;
 const int TILE_SIZE = 32;
 
-const int MAP_WIDTH = WINDOW_WIDTH / TILE_SIZE;   // Nombre de tuiles en largeur
-const int MAP_HEIGHT = WINDOW_HEIGHT / TILE_SIZE; // Nombre de tuiles en hauteur
-//const int MAP_WIDTH = 30;   // Nombre de tuiles en largeur
-//const int MAP_HEIGHT = 18; // Nombre de tuiles en hauteur
+//const int MAP_WIDTH = WINDOW_WIDTH / TILE_SIZE;   // Nombre de tuiles en largeur
+//const int MAP_HEIGHT = WINDOW_HEIGHT / TILE_SIZE; // Nombre de tuiles en hauteur
+const int MAP_WIDTH = 30;   // Nombre de tuiles en largeur
+const int MAP_HEIGHT = 18; // Nombre de tuiles en hauteur
 const int MAX_TILES = MAP_WIDTH * MAP_HEIGHT;     // Nombre total de tuiles dans la carte
 
 // Police principale du jeu
-const String PressStart2P = "Assets/PressStart2P-Regular.ttf";
+const std::string PressStart2P = "Assets/PressStart2P-Regular.ttf";
 
 int main()
 {
@@ -77,8 +80,8 @@ int main()
 	//===============================
     sf::RenderWindow window(sf::VideoMode({ WINDOW_WIDTH, WINDOW_HEIGHT }), "Hikari");
 	//sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Hikari", sf::Style::Default, sf::State::Fullscreen);
-	//window.setFramerateLimit(60);
-	window.setVerticalSyncEnabled(true);
+	window.setFramerateLimit(60);
+	//window.setVerticalSyncEnabled(true);
 
 	//===============================
 	// Création du menu principal
@@ -101,15 +104,15 @@ int main()
 	int selectedMainIndex = 0;
 
 	float startXMain = 20.f;
-	float startYMain = 600.f;
-	float buttonWidthMain = 100.f;
-	float buttonHeightMain = 20.f;
+	float startYMain = 400.f;
+	float buttonWidthMain = 150.f;
+	float buttonHeightMain = 30.f;
 	float spacingMain = 10.f;
 
 	// En-tête "MAIN MENU"
-	sf::Text MMHeader(font, "HIKARI", 30);
-	MMHeader.setFillColor(sf::Color(WHITE_LESS));
-	MMHeader.setPosition({ (startXMain * 1.5f), 60.f });
+	sf::Text MMHeader(mainMenuFont, "HIKARI", 70);
+	MMHeader.setFillColor(sf::Color::White);
+	MMHeader.setPosition({ (startXMain * 1.5f), 50.f });
 
 	// Génération les boutons du menu principal
 	for (size_t i = 0; i < menuLabels.size(); ++i) {
@@ -121,28 +124,33 @@ int main()
 
 		// Remplissage du texte des boutons
 		if (i == 0) {
-			mainButton.background.setFillColor(sf::Color::White);
+			mainButton.background.setFillColor(sf::Color::Transparent);
 		}
 		else {
-			mainButton.background.setFillColor(sf::Color::Black);
+			mainButton.background.setFillColor(sf::Color::Transparent);
 		}
 
 		// Configuration du texte à l'intérieur du bouton
-		mainButton.text = sf::Text(font, menuLabels[i], 14);
-		mainButton.text.setFillColor(sf::Color::Black);
+		mainButton.text = sf::Text(mainMenuFont, menuLabels[i], 14);
+		if (i == 0) {
+			mainButton.text.setFillColor(sf::Color::White);
+		}
+		else {
+			mainButton.text.setFillColor(sf::Color::Black);
+		}
 
 		// Centrer le texte verticalement à l'intérieur du rectangle
 		mainButton.text.setPosition({ startXMain + 12.f, startYMain + i * (buttonHeightMain + spacingMain) + 8.f });
 
-		mainMenu.push_back(mainbutton);
+		mainMenu.push_back(mainButton);
 	}
 	
 	//===============================
 	// Création du menu de pause
 	//===============================
 	// Police pour le texte du menu de pause
-	sf::Font font;
-	if (!font.openFromFile(PressStart2P))
+	sf::Font pauseMenuFont;
+	if (!pauseMenuFont.openFromFile(PressStart2P))
 	{
 		std::cerr << "Erreur lors du chargement de la police de texte" << std::endl;
 		return -1;
@@ -164,13 +172,13 @@ int main()
 	float spacing = 10.f;
 
 	// En-tête "PAUSE MENU"
-	sf::Text pauseHeader(font, "PAUSE MENU", 20);
-	pauseHeader.setFillColor(sf::Color::Black);
-	pauseHeader.setPosition({ (startX * 1.5f), 60.f });
+	sf::Text pauseHeader(pauseMenuFont, "PAUSE MENU", 30);
+	pauseHeader.setFillColor(sf::Color::White);
+	pauseHeader.setPosition({ (startX * 1.75f), 30.f });
 
 	// Génération les boutons du menu de pause
 	for (size_t i = 0; i < pauseLabels.size(); ++i) {
-		MenuButton button(font);
+		MenuButton button(pauseMenuFont);
 
 		// Configuration de l'arrière du bouton
 		button.background.setSize({ buttonWidth, buttonHeight });
@@ -178,18 +186,23 @@ int main()
 
 		// Remplissage du texte des boutons
 		if (i == 0) {
-			button.background.setFillColor(sf::Color::Red);
+			button.background.setFillColor(sf::Color(SUBTLE_BLACK));
 		}
 		else {
-			button.background.setFillColor(sf::Color(WHITE_LESS));
+			button.background.setFillColor(sf::Color::Transparent);
 		}
 
 		// Configuration du texte à l'intérieur du bouton
-		button.text = sf::Text(font, pauseLabels[i], 14);
-		button.text.setFillColor(sf::Color::Black);
+		button.text = sf::Text(pauseMenuFont, pauseLabels[i], 14);
+		if (i == 0) {
+			button.text.setFillColor(sf::Color::White);
+		}
+		else {
+			button.text.setFillColor(sf::Color::Black);
+		}
 
 		// Centrer le texte verticalement à l'intérieur du rectangle
-		button.text.setPosition({ startX + 15.f, startY + i * (buttonHeight + spacing) + 12.f });
+		button.text.setPosition({ startX + 15.f, startY + i * (buttonHeight + spacing) + 14.f });
 
 		pauseMenu.push_back(button);
 	}
@@ -270,7 +283,7 @@ int main()
 	bool showHitboxes = false;
 
 	// Variable pour gérer l'état du jeu (menu de pause ou en cours de jeu)
-	GameState currentGameState = GameState::Playing;
+	GameState currentGameState = GameState::Menu;
 
 	//===============================
 	// Loop principal du jeu
@@ -291,8 +304,86 @@ int main()
             if (event->is<sf::Event::Closed>())
                 window.close();
 
+			switch (currentGameState) {
+			case GameState::Menu:
+				// Gérer les événements du menu principal ici
+				// Mouse Hover Logic
+				if (const auto* mouseMoved = event->getIf<sf::Event::MouseMoved>()) {
+					sf::Vector2f mousePos = window.mapPixelToCoords(mouseMoved->position);
+
+					for (size_t i = 0; i < mainMenu.size(); ++i) {
+						if (mainMenu[i].background.getGlobalBounds().contains(mousePos)) {
+							// Reset old selected button to default look
+							mainMenu[selectedMainIndex].background.setFillColor(sf::Color::Transparent);
+							mainMenu[selectedMainIndex].text.setFillColor(sf::Color::Black);
+
+							// Highlight new hovered button
+							selectedMainIndex = i;
+
+							// Put the new hovered button to highlighted look
+							mainMenu[selectedMainIndex].background.setFillColor(sf::Color::Transparent);
+							mainMenu[selectedMainIndex].text.setFillColor(sf::Color::White);
+						}
+					}
+				}
+
+				// Mouse Click Logic
+				if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>()) {
+					if (mousePressed->button == sf::Mouse::Button::Left) {
+						sf::Vector2f mousePos = window.mapPixelToCoords(mousePressed->position);
+
+						for (size_t i = 0; i < mainMenu.size(); ++i) {
+							if (mainMenu[i].background.getGlobalBounds().contains(mousePos)) {
+								if (i == 0) currentGameState = GameState::Playing; // Resume
+								else if (i == 1) ;
+								else if (i == 2) ;
+								else if (i == 3) window.close();
+							}
+						}
+					}
+				}
+
+				// Keyboard Logic (Navigate Pause Menu)
+				if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+					if (keyPressed->code == sf::Keyboard::Key::Up) {
+						if (selectedMainIndex - 1 >= 0) {
+							// Reset old selected button to default look
+							mainMenu[selectedMainIndex].background.setFillColor(sf::Color::Transparent);
+							mainMenu[selectedMainIndex].text.setFillColor(sf::Color::Black);
+							
+							// Move to the previous button in the menu
+							selectedMainIndex--;
+							
+							// Put the new hovered button to highlighted look
+							mainMenu[selectedMainIndex].background.setFillColor(sf::Color::Transparent);
+							mainMenu[selectedMainIndex].text.setFillColor(sf::Color::White);
+						}
+					}
+					else if (keyPressed->code == sf::Keyboard::Key::Down) {
+						if (selectedMainIndex + 1 < mainMenu.size()) {
+							// Reset old selected button to default look
+							mainMenu[selectedMainIndex].background.setFillColor(sf::Color::Transparent);
+							mainMenu[selectedMainIndex].text.setFillColor(sf::Color::Black);
+
+							// Move to the next button in the menu
+							selectedMainIndex++;
+
+							// Put the new hovered button to highlighted look
+							mainMenu[selectedMainIndex].background.setFillColor(sf::Color::Transparent);
+							mainMenu[selectedMainIndex].text.setFillColor(sf::Color::White);
+						}
+					}
+					else if (keyPressed->code == sf::Keyboard::Key::Enter) {
+						if (selectedMainIndex == 0) currentGameState = GameState::Playing;
+						else if (selectedMainIndex == 1) ;
+						else if (selectedMainIndex == 2) ;
+						else if (selectedMainIndex == 3) window.close();
+					}
+				}
+				break;
 			// --- GAMEPLAY CONTROLS ---
-			if (currentGameState == GameState::Playing) {
+			case GameState::Playing:
+				// Gérer les événements du jeu en cours ici
 				if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
 					if (keyPressed->code == sf::Keyboard::Key::Escape) {
 						// Arreter le jeu et passer au menu de pause
@@ -302,9 +393,10 @@ int main()
 						playerCharacter.resetInputs();				
 					}
 				}
-			}
+				break;
 			// --- PAUSE MENU CONTROLS ---
-			else if (currentGameState == GameState::PauseMenu) {
+			case GameState::PauseMenu:
+				// Gérer les événements du menu de pause ici
 
 				// Mouse Hover Logic
 				if (const auto* mouseMoved = event->getIf<sf::Event::MouseMoved>()) {
@@ -318,8 +410,10 @@ int main()
 
 							// Highlight new hovered button
 							selectedPauseIndex = i;
-							pauseMenu[selectedPauseIndex].background.setFillColor(sf::Color::Transparent);
-							//pauseMenu[selectedPauseIndex].text.setFillColor(sf::Color::Black);
+
+							// Put the new hovered button to highlighted look
+							pauseMenu[selectedPauseIndex].background.setFillColor(sf::Color(SUBTLE_BLACK));
+							pauseMenu[selectedPauseIndex].text.setFillColor(sf::Color::White);
 						}
 					}
 				}
@@ -339,27 +433,40 @@ int main()
 					}
 				}
 
+				// Keyboard Logic (Navigate Pause Menu)
 				if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
                     if (keyPressed->code == sf::Keyboard::Key::Up) {
                         if (selectedPauseIndex - 1 >= 0) {
-                            menu[selectedPauseIndex].setFillColor(sf::Color::White);
-                            selectedItemIndex--;
-                            menu[selectedPauseIndex].setFillColor(sf::Color::Red);
+							// Reset old selected button to default look
+                            pauseMenu[selectedPauseIndex].background.setFillColor(sf::Color::Transparent);
+							pauseMenu[selectedPauseIndex].text.setFillColor(sf::Color::Black);
+
+							// Move to the previous button in the menu
+                            selectedPauseIndex--;
+
+							// Put the new hovered button to highlighted look
+							pauseMenu[selectedPauseIndex].background.setFillColor(sf::Color(SUBTLE_BLACK));
+                            pauseMenu[selectedPauseIndex].text.setFillColor(sf::Color::White);
                         }
                     } 
                     else if (keyPressed->code == sf::Keyboard::Key::Down) {
-                        if (selectedItemIndex + 1 < MAX_ITEMS) {
-                            menu[selectedItemIndex].setFillColor(sf::Color::White);
-                            selectedItemIndex++;
-                            menu[selectedItemIndex].setFillColor(sf::Color::Red);
+                        if (selectedPauseIndex + 1 < pauseMenu.size()) {
+							// Reset old selected button to default look
+                            pauseMenu[selectedPauseIndex].background.setFillColor(sf::Color::Transparent);
+							pauseMenu[selectedPauseIndex].text.setFillColor(sf::Color::Black);
+
+							// Move to the next button in the menu
+                            selectedPauseIndex++;
+
+							// Put the new hovered button to highlighted look
+							pauseMenu[selectedPauseIndex].background.setFillColor(sf::Color(SUBTLE_BLACK));
+                            pauseMenu[selectedPauseIndex].text.setFillColor(sf::Color::White);
                         }
                     } 
-                    else if (keyPressed->code == sf::Keyboard::Key::Enter) { // Return is renamed to Enter in SFML 3
-                        if (selectedItemIndex == 0) {
-                            currentState = GameState::Playing;
-                        } else if (selectedItemIndex == 1) {
-                            window.close();
-                        }
+                    else if (keyPressed->code == sf::Keyboard::Key::Enter) {
+                        if (selectedPauseIndex == 0) currentGameState = GameState::Playing;
+                        else if (selectedPauseIndex == 1) window.close();
+						else if (selectedPauseIndex == 2) currentGameState = GameState::Menu;
                     }
                 }
 
@@ -369,6 +476,7 @@ int main()
 						currentGameState = GameState::Playing;
 					}
 				}
+				break;
 			}
 
 			if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
@@ -416,8 +524,30 @@ int main()
 		// Pour le rendu, on efface la fenêtre avec une couleur noire
         window.clear(sf::Color::Black);
 
+		if (currentGameState == GameState::Menu) {
+			// Dessiner une image de fond pour le menu principal
+			/*sf::Texture backgroundTexture;
+			if (!backgroundTexture.loadFromFile("Assets/MainMenuBackground.png")) {
+				std::cerr << "Erreur lors du chargement de l'image de fond" << std::endl;
+				return -1;
+			}
+			sf::Sprite backgroundSprite(backgroundTexture);
+			window.draw(backgroundSprite);*/
+
+			// Dessiner un background sombre pour le menu principal (Temporaire)
+			sf::RectangleShape mainMenuBackground(sf::Vector2f(1920.f, 1080.f));
+			mainMenuBackground.setFillColor(sf::Color(58, 58, 58));
+			window.draw(mainMenuBackground);
+
+			// Draw Main Menu UI elements
+			window.draw(MMHeader);
+			for (const auto& button : mainMenu) {
+				window.draw(button.background);
+				window.draw(button.text);
+			}
+		}
 		// Pour le rendu, on vérifie si le jeu est en cours ou en pause pour dessiner les éléments du jeu
-		if (currentGameState == GameState::Playing || currentGameState == GameState::PauseMenu) {
+		else if (currentGameState == GameState::Playing || currentGameState == GameState::PauseMenu) {
 			// Appliquer la vue de la caméra à la fenêtre
 			playerCamera.apply(window);
 
