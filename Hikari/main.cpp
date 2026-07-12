@@ -47,6 +47,61 @@ struct MenuButton {
 	MenuButton(const sf::Font& font) : text(font) {}
 };
 
+//==============================
+// Fonction pour calculer une taille en fonction de la taille de la fenêtre
+// Paramètres:
+// - baseFontSize : la taille de la police d'origine
+// - baseWindowWidth : la largeur de la fenêtre d'origine
+// - baseWindowHeight : la hauteur de la fenêtre d'origine
+// - currentWindowWidth : la largeur de la fenêtre actuelle
+// - currentWindowHeight : la hauteur de la fenêtre actuelle
+// Description:
+// La taille est basé sur une ancienne taille de fenêtre et une taille précédente
+//==============================
+static int calculateSize(int baseSize, int baseWindowWidth, int baseWindowHeight, int currentWindowWidth, int currentWindowHeight) {
+	float PX = static_cast<float>(baseSize) / baseWindowWidth;	// Pourcentage de la position X de l'en-tête par rapport à la largeur de la fenêtre (960)
+	float PY = static_cast<float>(baseSize) / baseWindowHeight;	// Pourcentage de la position Y de l'en-tête par rapport à la hauteur de la fenêtre (576)
+
+	float sizeX = currentWindowWidth * PX;	// Taille de la position X de l'en-tête par rapport à la largeur de la fenêtre (960)
+	float sizeY = currentWindowHeight * PY;	// Taille de la position Y de l'en-tête par rapport à la hauteur de la fenêtre (576)
+
+	return int(((sizeX + sizeY) / 2));
+}
+
+//==============================
+// Fonction pour calculer une taille X en fonction de la taille de la fenêtre
+// Paramètres:
+// - baseFontSize : la taille de la police d'origine
+// - baseWindowWidth : la largeur de la fenêtre d'origine
+// - currentWindowWidth : la largeur de la fenêtre actuelle
+// Description:
+// La taille est basé sur une ancienne taille X de fenêtre et une taille X précédente
+//==============================
+static float calculateSizeX(float baseSize, int baseWindowWidth, int currentWindowWidth) {
+	float PX = baseSize / baseWindowWidth;	// Pourcentage de la position X de l'en-tête par rapport à la largeur de la fenêtre (960)
+	
+	float sizeX = currentWindowWidth * PX;	// Taille de la position X de l'en-tête par rapport à la largeur de la fenêtre (960)
+	
+	return sizeX;
+}
+
+//==============================
+// Fonction pour calculer une taille Y en fonction de la taille de la fenêtre
+// Paramètres:
+// - baseFontSize : la taille de la police d'origine
+// - baseWindowHeight : la hauteur de la fenêtre d'origine
+// - currentWindowHeight : la hauteur de la fenêtre actuelle
+// Description:
+// La taille est basé sur une ancienne taille Y de fenêtre et une taille Y précédente
+//==============================
+static float calculateSizeY(float baseSize, int baseWindowHeight, int currentWindowHeight) {
+	float PY = baseSize / baseWindowHeight;	// Pourcentage de la position Y de l'en-tête par rapport à la hauteur de la fenêtre (576)
+	
+	float sizeY = currentWindowHeight * PY;	// Taille de la position Y de l'en-tête par rapport à la hauteur de la fenêtre (576)
+	
+	return sizeY;
+}
+
 //===============================
 // Constantes de couleurs
 //===============================
@@ -103,16 +158,21 @@ int main()
 	std::vector<MenuButton> mainMenu;
 	int selectedMainIndex = 0;
 
-	float startXMain = 20.f;
-	float startYMain = 400.f;
-	float buttonWidthMain = 150.f;
-	float buttonHeightMain = 30.f;
-	float spacingMain = 10.f;
+	float startXMain = WINDOW_WIDTH * 0.0208f;
+	float startYMain = WINDOW_HEIGHT * 0.694f;
+	float buttonWidthMain = WINDOW_WIDTH * 0.156f;
+	float buttonHeightMain = WINDOW_HEIGHT * 0.052f;
+	float spacingMain = WINDOW_HEIGHT * 0.0173f;
 
+	// Taille de la police de l'en-tête
+	int MMHeaderSize = calculateSize(70, 960, 576, WINDOW_WIDTH, WINDOW_HEIGHT);	// Taille de la police de l'en-tête
 	// En-tête "MAIN MENU"
-	sf::Text MMHeader(mainMenuFont, "HIKARI", 70);
+	sf::Text MMHeader(mainMenuFont, "HIKARI", MMHeaderSize);
 	MMHeader.setFillColor(sf::Color::White);
-	MMHeader.setPosition({ (startXMain * 1.5f), 50.f });
+
+	// Positionnement Y de l'en-tête du menu principal
+	float MMHeaderOffsetY = calculateSizeY(50.f, 576, WINDOW_HEIGHT);	
+	MMHeader.setPosition({ (startXMain * 1.5f), MMHeaderOffsetY });
 
 	// Génération les boutons du menu principal
 	for (size_t i = 0; i < menuLabels.size(); ++i) {
@@ -130,8 +190,10 @@ int main()
 			mainButton.background.setFillColor(sf::Color::Transparent);
 		}
 
+		// Taille de la police du texte à l'intérieur du bouton
+		int mainButtonSize = calculateSize(14, 960, 576, WINDOW_WIDTH, WINDOW_HEIGHT);	// Taille de la police de l'en-tête
 		// Configuration du texte à l'intérieur du bouton
-		mainButton.text = sf::Text(mainMenuFont, menuLabels[i], 14);
+		mainButton.text = sf::Text(mainMenuFont, menuLabels[i], mainButtonSize);
 		if (i == 0) {
 			mainButton.text.setFillColor(sf::Color::White);
 		}
@@ -139,8 +201,10 @@ int main()
 			mainButton.text.setFillColor(sf::Color::Black);
 		}
 
+		float buttonOffSetXMain = calculateSizeX(12.f, 960, WINDOW_WIDTH);
+		float buttonOffSetYMain = calculateSizeY(8.f, 576, WINDOW_HEIGHT);
 		// Centrer le texte verticalement à l'intérieur du rectangle
-		mainButton.text.setPosition({ startXMain + 12.f, startYMain + i * (buttonHeightMain + spacingMain) + 8.f });
+		mainButton.text.setPosition({ startXMain + buttonOffSetXMain, startYMain + i * (buttonHeightMain + spacingMain) + buttonOffSetYMain });
 
 		mainMenu.push_back(mainButton);
 	}
@@ -165,16 +229,21 @@ int main()
 	std::vector<MenuButton> pauseMenu;
 	int selectedPauseIndex = 0;
 
-	float startX = 20.f;
-	float startY = 100.f;
-	float buttonWidth = 300.f;
-	float buttonHeight = 40.f;
-	float spacing = 10.f;
+	float startX = WINDOW_WIDTH * 0.0208f;
+	float startY = WINDOW_HEIGHT * 0.1736f;
+	float buttonWidth = WINDOW_WIDTH * 0.3125f;
+	float buttonHeight = WINDOW_HEIGHT * 0.0694f;
+	float spacing = WINDOW_HEIGHT * 0.0173f;
 
+	// Taille de la police de l'en-tête
+	int pauseHeaderSize = calculateSize(30, 960, 576, WINDOW_WIDTH, WINDOW_HEIGHT);
 	// En-tête "PAUSE MENU"
-	sf::Text pauseHeader(pauseMenuFont, "PAUSE MENU", 30);
+	sf::Text pauseHeader(pauseMenuFont, "PAUSE MENU", pauseHeaderSize);
 	pauseHeader.setFillColor(sf::Color::White);
-	pauseHeader.setPosition({ (startX * 1.75f), 30.f });
+
+	// Positionnement Y de l'en-tête du menu de pause
+	float pauseHeaderOffsetY = calculateSizeY(30.f, 576, WINDOW_HEIGHT);
+	pauseHeader.setPosition({ (startX * 1.75f), pauseHeaderOffsetY });
 
 	// Génération les boutons du menu de pause
 	for (size_t i = 0; i < pauseLabels.size(); ++i) {
@@ -192,8 +261,9 @@ int main()
 			button.background.setFillColor(sf::Color::Transparent);
 		}
 
+		int pauseButtonSize = calculateSize(14, 960, 576, WINDOW_WIDTH, WINDOW_HEIGHT);	// Taille de la police de l'en-tête
 		// Configuration du texte à l'intérieur du bouton
-		button.text = sf::Text(pauseMenuFont, pauseLabels[i], 14);
+		button.text = sf::Text(pauseMenuFont, pauseLabels[i], pauseButtonSize);
 		if (i == 0) {
 			button.text.setFillColor(sf::Color::White);
 		}
@@ -201,8 +271,10 @@ int main()
 			button.text.setFillColor(sf::Color::Black);
 		}
 
+		float buttonOffSetX = calculateSizeX(15.f, 960, WINDOW_WIDTH);
+		float buttonOffSetY = calculateSizeY(14.f, 576, WINDOW_HEIGHT);
 		// Centrer le texte verticalement à l'intérieur du rectangle
-		button.text.setPosition({ startX + 15.f, startY + i * (buttonHeight + spacing) + 14.f });
+		button.text.setPosition({ startX + buttonOffSetX, startY + i * (buttonHeight + spacing) + buttonOffSetY });
 
 		pauseMenu.push_back(button);
 	}
