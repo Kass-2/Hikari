@@ -1,5 +1,7 @@
 ### What I need to do in the game (Ideas and tasks)
-- Continue the menu implimentation. (Had the main menu and had the other button and functionality of the menu and pause menu)
+- Continue the menu implimentation. (Had the other button and functionality of the menu and pause menu)
+
+- Look for a way to have a fullscreen that works and also had a settings for it in the MM settings.
 
 - I need to do a mob class to be able to had different enemies.
 
