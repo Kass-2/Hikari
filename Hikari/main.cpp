@@ -102,6 +102,63 @@ static float calculateSizeY(float baseSize, int baseWindowHeight, int currentWin
 	return sizeY;
 }
 
+//==============================
+// Fonction pour recalculer la position des menus
+//==============================
+void recalculateLayout(
+	unsigned int width, unsigned int height,
+	sf::Font& mainMenuFont,
+	sf::Font& pauseMenuFont,
+	sf::Text& MMHeader, std::vector<MenuButton>& mainMenu,
+	sf::Text& pauseHeader, std::vector<MenuButton>& pauseMenu)
+{
+	// Update main header size and position
+	int MMHeaderSize = calculateSize(70, 960, 576, width, height);
+	MMHeader.setCharacterSize(MMHeaderSize);
+	float startXMain = width * 0.0208f;
+	float startYMain = height * 0.694f;
+	float MMHeaderOffsetY = calculateSizeY(50.f, 576, height);
+	MMHeader.setPosition({ (startXMain * 1.5f), MMHeaderOffsetY });
+
+	// Recalculate Main Menu buttons
+	float buttonWidthMain = width * 0.156f;
+	float buttonHeightMain = height * 0.052f;
+	float spacingMain = height * 0.0173f;
+	int mainButtonSize = calculateSize(14, 960, 576, width, height);
+	float buttonOffSetXMain = calculateSizeX(12.f, 960, width);
+	float buttonOffSetYMain = calculateSizeY(8.f, 576, height);
+
+	for (size_t i = 0; i < mainMenu.size(); ++i) {
+		mainMenu[i].background.setSize({ buttonWidthMain, buttonHeightMain });
+		mainMenu[i].background.setPosition({ startXMain, startYMain + i * (buttonHeightMain + spacingMain) });
+		mainMenu[i].text.setCharacterSize(mainButtonSize);
+		mainMenu[i].text.setPosition({ startXMain + buttonOffSetXMain, startYMain + i * (buttonHeightMain + spacingMain) + buttonOffSetYMain });
+	}
+
+	// Recalculate Pause Header size and position
+	int pauseHeaderSize = calculateSize(30, 960, 576, width, height);
+	pauseHeader.setCharacterSize(pauseHeaderSize);
+	float startX = width * 0.0208f;
+	float startY = height * 0.1736f;
+	float pauseHeaderOffsetY = calculateSizeY(30.f, 576, height);
+	pauseHeader.setPosition({ (startX * 1.75f), pauseHeaderOffsetY });
+
+	// Recalculate Pause Menu buttons
+	float buttonWidth = width * 0.3125f;
+	float buttonHeight = height * 0.0694f;
+	float spacing = height * 0.0173f;
+	int pauseButtonSize = calculateSize(14, 960, 576, width, height);
+	float buttonOffSetX = calculateSizeX(15.f, 960, width);
+	float buttonOffSetY = calculateSizeY(14.f, 576, height);
+
+	for (size_t i = 0; i < pauseMenu.size(); ++i) {
+		pauseMenu[i].background.setSize({ buttonWidth, buttonHeight });
+		pauseMenu[i].background.setPosition({ startX, startY + i * (buttonHeight + spacing) });
+		pauseMenu[i].text.setCharacterSize(pauseButtonSize);
+		pauseMenu[i].text.setPosition({ startX + buttonOffSetX, startY + i * (buttonHeight + spacing) + buttonOffSetY });
+	}
+}
+
 //===============================
 // Constantes de couleurs
 //===============================
@@ -113,19 +170,19 @@ sf::Color WHITE_GRAY(86, 86, 86);
 //===============================
 // Constantes pour la taille des tuiles et les dimensions de la carte
 //===============================
-//const int WINDOW_WIDTH = 960;
-//const int WINDOW_HEIGHT = 576;
-const int WINDOW_WIDTH = 1440;
-const int WINDOW_HEIGHT = 864;
+unsigned int windowWidth = 1440;
+unsigned int windowHeight = 864;
 const int TILE_SIZE = 32;
 
-//const int MAP_WIDTH = WINDOW_WIDTH / TILE_SIZE;   // Nombre de tuiles en largeur
-//const int MAP_HEIGHT = WINDOW_HEIGHT / TILE_SIZE; // Nombre de tuiles en hauteur
+//const int MAP_WIDTH = windowWidth / TILE_SIZE;   // Nombre de tuiles en largeur
+//const int MAP_HEIGHT = windowHeight / TILE_SIZE; // Nombre de tuiles en hauteur
 const int MAP_WIDTH = 30;   // Nombre de tuiles en largeur
-const int MAP_HEIGHT = 18; // Nombre de tuiles en hauteur
+const int MAP_HEIGHT = 18;	// Nombre de tuiles en hauteur
 const int MAX_TILES = MAP_WIDTH * MAP_HEIGHT;     // Nombre total de tuiles dans la carte
 
+//===============================
 // Police principale du jeu
+//===============================
 const std::string PressStart2P = "Assets/PressStart2P-Regular.ttf";
 
 int main()
@@ -133,8 +190,7 @@ int main()
 	//===============================
 	// Creation de la fenêtre de jeu
 	//===============================
-    sf::RenderWindow window(sf::VideoMode({ WINDOW_WIDTH, WINDOW_HEIGHT }), "Hikari");
-	//sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Hikari", sf::Style::Default, sf::State::Fullscreen);
+    sf::RenderWindow window(sf::VideoMode({ windowWidth, windowHeight }), "Hikari");
 	window.setFramerateLimit(60);
 	//window.setVerticalSyncEnabled(true);
 
@@ -158,20 +214,20 @@ int main()
 	std::vector<MenuButton> mainMenu;
 	int selectedMainIndex = 0;
 
-	float startXMain = WINDOW_WIDTH * 0.0208f;
-	float startYMain = WINDOW_HEIGHT * 0.694f;
-	float buttonWidthMain = WINDOW_WIDTH * 0.156f;
-	float buttonHeightMain = WINDOW_HEIGHT * 0.052f;
-	float spacingMain = WINDOW_HEIGHT * 0.0173f;
+	float startXMain = windowWidth * 0.0208f;
+	float startYMain = windowHeight * 0.694f;
+	float buttonWidthMain = windowWidth * 0.156f;
+	float buttonHeightMain = windowHeight * 0.052f;
+	float spacingMain = windowHeight * 0.0173f;
 
 	// Taille de la police de l'en-tête
-	int MMHeaderSize = calculateSize(70, 960, 576, WINDOW_WIDTH, WINDOW_HEIGHT);	// Taille de la police de l'en-tête
+	int MMHeaderSize = calculateSize(70, 960, 576, windowWidth, windowHeight);	// Taille de la police de l'en-tête
 	// En-tête "MAIN MENU"
 	sf::Text MMHeader(mainMenuFont, "HIKARI", MMHeaderSize);
 	MMHeader.setFillColor(sf::Color::White);
 
 	// Positionnement Y de l'en-tête du menu principal
-	float MMHeaderOffsetY = calculateSizeY(50.f, 576, WINDOW_HEIGHT);	
+	float MMHeaderOffsetY = calculateSizeY(50.f, 576, windowHeight);	
 	MMHeader.setPosition({ (startXMain * 1.5f), MMHeaderOffsetY });
 
 	// Génération les boutons du menu principal
@@ -191,7 +247,7 @@ int main()
 		}
 
 		// Taille de la police du texte à l'intérieur du bouton
-		int mainButtonSize = calculateSize(14, 960, 576, WINDOW_WIDTH, WINDOW_HEIGHT);	// Taille de la police de l'en-tête
+		int mainButtonSize = calculateSize(14, 960, 576, windowWidth, windowHeight);	// Taille de la police de l'en-tête
 		// Configuration du texte à l'intérieur du bouton
 		mainButton.text = sf::Text(mainMenuFont, menuLabels[i], mainButtonSize);
 		if (i == 0) {
@@ -201,8 +257,8 @@ int main()
 			mainButton.text.setFillColor(sf::Color::Black);
 		}
 
-		float buttonOffSetXMain = calculateSizeX(12.f, 960, WINDOW_WIDTH);
-		float buttonOffSetYMain = calculateSizeY(8.f, 576, WINDOW_HEIGHT);
+		float buttonOffSetXMain = calculateSizeX(12.f, 960, windowWidth);
+		float buttonOffSetYMain = calculateSizeY(8.f, 576, windowHeight);
 		// Centrer le texte verticalement à l'intérieur du rectangle
 		mainButton.text.setPosition({ startXMain + buttonOffSetXMain, startYMain + i * (buttonHeightMain + spacingMain) + buttonOffSetYMain });
 
@@ -229,20 +285,20 @@ int main()
 	std::vector<MenuButton> pauseMenu;
 	int selectedPauseIndex = 0;
 
-	float startX = WINDOW_WIDTH * 0.0208f;
-	float startY = WINDOW_HEIGHT * 0.1736f;
-	float buttonWidth = WINDOW_WIDTH * 0.3125f;
-	float buttonHeight = WINDOW_HEIGHT * 0.0694f;
-	float spacing = WINDOW_HEIGHT * 0.0173f;
+	float startX = windowWidth * 0.0208f;
+	float startY = windowHeight * 0.1736f;
+	float buttonWidth = windowWidth * 0.3125f;
+	float buttonHeight = windowHeight * 0.0694f;
+	float spacing = windowHeight * 0.0173f;
 
 	// Taille de la police de l'en-tête
-	int pauseHeaderSize = calculateSize(30, 960, 576, WINDOW_WIDTH, WINDOW_HEIGHT);
+	int pauseHeaderSize = calculateSize(30, 960, 576, windowWidth, windowHeight);
 	// En-tête "PAUSE MENU"
 	sf::Text pauseHeader(pauseMenuFont, "PAUSE MENU", pauseHeaderSize);
 	pauseHeader.setFillColor(sf::Color::White);
 
 	// Positionnement Y de l'en-tête du menu de pause
-	float pauseHeaderOffsetY = calculateSizeY(30.f, 576, WINDOW_HEIGHT);
+	float pauseHeaderOffsetY = calculateSizeY(30.f, 576, windowHeight);
 	pauseHeader.setPosition({ (startX * 1.75f), pauseHeaderOffsetY });
 
 	// Génération les boutons du menu de pause
@@ -261,7 +317,7 @@ int main()
 			button.background.setFillColor(sf::Color::Transparent);
 		}
 
-		int pauseButtonSize = calculateSize(14, 960, 576, WINDOW_WIDTH, WINDOW_HEIGHT);	// Taille de la police de l'en-tête
+		int pauseButtonSize = calculateSize(14, 960, 576, windowWidth, windowHeight);	// Taille de la police de l'en-tête
 		// Configuration du texte à l'intérieur du bouton
 		button.text = sf::Text(pauseMenuFont, pauseLabels[i], pauseButtonSize);
 		if (i == 0) {
@@ -271,8 +327,8 @@ int main()
 			button.text.setFillColor(sf::Color::Black);
 		}
 
-		float buttonOffSetX = calculateSizeX(15.f, 960, WINDOW_WIDTH);
-		float buttonOffSetY = calculateSizeY(14.f, 576, WINDOW_HEIGHT);
+		float buttonOffSetX = calculateSizeX(15.f, 960, windowWidth);
+		float buttonOffSetY = calculateSizeY(14.f, 576, windowHeight);
 		// Centrer le texte verticalement à l'intérieur du rectangle
 		button.text.setPosition({ startX + buttonOffSetX, startY + i * (buttonHeight + spacing) + buttonOffSetY });
 
@@ -304,7 +360,7 @@ int main()
 	//===============================
 	// Création de la caméra
 	//===============================
-	Camera playerCamera(WINDOW_WIDTH, WINDOW_HEIGHT, MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, 0.7f);
+	Camera playerCamera(windowWidth, windowHeight, MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, 0.7f);
 
 	//=================================
 	// Création de la barre de vie du joueur
@@ -316,8 +372,8 @@ int main()
 	//===============================
 	MiniMap miniMap((float)(MAP_WIDTH),
 					(float)(MAP_HEIGHT),
-					(float)WINDOW_WIDTH,
-					(float)WINDOW_HEIGHT, TILE_SIZE);
+					(float)windowWidth,
+					(float)windowHeight, TILE_SIZE);
 
 	//===============================
 	// Création de la carte de tuiles
@@ -356,6 +412,8 @@ int main()
 
 	// Variable pour gérer l'état du jeu (menu de pause ou en cours de jeu)
 	GameState currentGameState = GameState::Menu;
+
+	bool isFullscreen = false;
 
 	//===============================
 	// Loop principal du jeu
@@ -407,7 +465,30 @@ int main()
 						for (size_t i = 0; i < mainMenu.size(); ++i) {
 							if (mainMenu[i].background.getGlobalBounds().contains(mousePos)) {
 								if (i == 0) currentGameState = GameState::Playing; // Resume
-								else if (i == 1) ;
+								else if (i == 1) {
+									isFullscreen = !isFullscreen;
+									if (isFullscreen) {
+										window.create(sf::VideoMode::getDesktopMode(), "Hikari",
+											sf::Style::Default, sf::State::Fullscreen);
+									}
+									else {
+										window.create(sf::VideoMode({ 1440, 864 }), "Hikari",
+											sf::Style::Default, sf::State::Windowed);
+									}
+									window.setFramerateLimit(60);
+
+									// Retrieve the actual new window dimensions
+									windowWidth = window.getSize().x;
+									windowHeight = window.getSize().y;
+
+									// Update UI Layout positions and sizes
+									recalculateLayout(windowWidth, windowHeight, mainMenuFont,
+										pauseMenuFont, MMHeader, mainMenu, pauseHeader, pauseMenu);
+
+									// Update Camera and Minimap dimensions
+									playerCamera.updateSize(windowWidth, windowHeight, 0.7f);
+									miniMap.updateWindowSize(windowWidth, windowHeight);
+								}
 								else if (i == 2) ;
 								else if (i == 3) window.close();
 							}
@@ -447,7 +528,30 @@ int main()
 					}
 					else if (keyPressed->code == sf::Keyboard::Key::Enter) {
 						if (selectedMainIndex == 0) currentGameState = GameState::Playing;
-						else if (selectedMainIndex == 1) ;
+						else if (selectedMainIndex == 1) {
+							isFullscreen = !isFullscreen;
+							if (isFullscreen) {
+								window.create(sf::VideoMode::getDesktopMode(), "Hikari",
+									sf::Style::Default, sf::State::Fullscreen);
+							}
+							else {
+								window.create(sf::VideoMode({ 1440, 864 }), "Hikari",
+									sf::Style::Default, sf::State::Windowed);
+							}
+							window.setFramerateLimit(60);
+
+							// Retrieve the actual new window dimensions
+							windowWidth = window.getSize().x;
+							windowHeight = window.getSize().y;
+
+							// Update UI Layout positions and sizes
+							recalculateLayout(windowWidth, windowHeight, mainMenuFont,
+								pauseMenuFont, MMHeader, mainMenu, pauseHeader, pauseMenu);
+
+							// Update Camera and Minimap dimensions
+							playerCamera.updateSize(windowWidth, windowHeight, 0.7f);
+							miniMap.updateWindowSize(windowWidth, windowHeight);
+						}
 						else if (selectedMainIndex == 2) ;
 						else if (selectedMainIndex == 3) window.close();
 					}
@@ -498,7 +602,30 @@ int main()
 						for (size_t i = 0; i < pauseMenu.size(); ++i) {
 							if (pauseMenu[i].background.getGlobalBounds().contains(mousePos)) {
 								if (i == 0) currentGameState = GameState::Playing; // Resume
-								else if (i == 1) window.close(); // Exit (TODO : change it because it supposed to be settings)
+								else if (i == 1) {
+									isFullscreen = !isFullscreen;
+									if (isFullscreen) {
+										window.create(sf::VideoMode::getDesktopMode(), "Hikari",
+											sf::Style::Default, sf::State::Fullscreen);
+									}
+									else {
+										window.create(sf::VideoMode({ 1440, 864 }), "Hikari",
+											sf::Style::Default, sf::State::Windowed);
+									}
+									window.setFramerateLimit(60);
+
+									// Retrieve the actual new window dimensions
+									windowWidth = window.getSize().x;
+									windowHeight = window.getSize().y;
+
+									// Update UI Layout positions and sizes
+									recalculateLayout(windowWidth, windowHeight, mainMenuFont,
+										pauseMenuFont, MMHeader, mainMenu, pauseHeader, pauseMenu);
+
+									// Update Camera and Minimap dimensions
+									playerCamera.updateSize(windowWidth, windowHeight, 0.7f);
+									miniMap.updateWindowSize(windowWidth, windowHeight);
+								}
 								else if (i == 2) currentGameState = GameState::Menu; // Go to main menu
 							}
 						}
@@ -537,7 +664,30 @@ int main()
                     } 
                     else if (keyPressed->code == sf::Keyboard::Key::Enter) {
                         if (selectedPauseIndex == 0) currentGameState = GameState::Playing;
-                        else if (selectedPauseIndex == 1) window.close();
+                        else if (selectedPauseIndex == 1) {
+							isFullscreen = !isFullscreen;
+							if (isFullscreen) {
+								window.create(sf::VideoMode::getDesktopMode(), "Hikari",
+									sf::Style::Default, sf::State::Fullscreen);
+							}
+							else {
+								window.create(sf::VideoMode({ 1440, 864 }), "Hikari",
+									sf::Style::Default, sf::State::Windowed);
+							}
+							window.setFramerateLimit(60);
+
+							// Retrieve the actual new window dimensions
+							windowWidth = window.getSize().x;
+							windowHeight = window.getSize().y;
+
+							// Update UI Layout positions and sizes
+							recalculateLayout(windowWidth, windowHeight, mainMenuFont,
+								pauseMenuFont, MMHeader, mainMenu, pauseHeader, pauseMenu);
+
+							// Update Camera and Minimap dimensions
+							playerCamera.updateSize(windowWidth, windowHeight, 0.7f);
+							miniMap.updateWindowSize(windowWidth, windowHeight);
+						}
 						else if (selectedPauseIndex == 2) currentGameState = GameState::Menu;
                     }
                 }
@@ -607,7 +757,7 @@ int main()
 			window.draw(backgroundSprite);*/
 
 			// Dessiner un background sombre pour le menu principal (Temporaire)
-			sf::RectangleShape mainMenuBackground(sf::Vector2f(1920.f, 1080.f));
+			sf::RectangleShape mainMenuBackground(sf::Vector2f(windowWidth, windowHeight));
 			mainMenuBackground.setFillColor(sf::Color(58, 58, 58));
 			window.draw(mainMenuBackground);
 

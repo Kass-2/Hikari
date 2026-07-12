@@ -22,6 +22,11 @@ public:
 	MiniMap(float mapWidth, float mapHeight, float windowWidth, float windowHeight, int tileSize);
 
 	//===============================
+	// Changer la taille de la minimap
+	//===============================
+	void updateWindowSize(float windowWidth, float windowHeight);
+
+	//===============================
 	// Mise à jour de la mini-carte en fonction de la position du joueur
 	//===============================
 	void handleEvent(const sf::Event& event);

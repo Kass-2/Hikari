@@ -28,6 +28,11 @@ public:
 	Camera(int width, int height, int map_width, int map_height, int tile_size, float zoom = 1.0f);
 
 	//===============================
+	// Changer la taille de la caméra
+	//===============================
+	void updateSize(float width, float height, float zoom);
+
+	//===============================
 	// Mise à jour de la caméra (Clamping)
 	//===============================
 	void clamped(const Player& player, const sf::Sprite& sprite);

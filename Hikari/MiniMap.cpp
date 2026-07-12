@@ -60,6 +60,22 @@ MiniMap::MiniMap(float mapWidth, float mapHeight, float windowWidth, float windo
     testCharDot.setOrigin({ 12.f, 12.f });
 }
 
+void MiniMap::updateWindowSize(float windowWidth, float windowHeight) {
+    float viewWidth = windowWidth * 0.1875f;
+    float viewHeight = windowHeight * 0.1875f;
+    float viewX = windowWidth - viewWidth - 20.f;
+    float viewY = 20.f;
+
+    view.setViewport(sf::FloatRect(
+        { viewX / windowWidth, viewY / windowHeight },
+        { viewWidth / windowWidth, viewHeight / windowHeight }
+    ));
+    background.setSize({ viewWidth, viewHeight });
+    background.setPosition({ viewX, viewY });
+    border.setSize({ viewWidth, viewHeight });
+    border.setPosition({ viewX, viewY });
+}
+
 void MiniMap::handleEvent(const sf::Event & event) {
     if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>()) {
         if (keyPressed->code == sf::Keyboard::Key::M) {

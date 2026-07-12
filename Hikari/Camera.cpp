@@ -25,6 +25,11 @@ Camera::Camera(int width, int height,
 	TILE_SIZE = tile_size;
 }
 
+void Camera::updateSize(float width, float height, float zoom) {
+    camera.setSize({ width, height });
+    camera.zoom(zoom);
+}
+
 void Camera::clamped(const Player& player, const sf::Sprite& sprite) {
     sf::Vector2f playerPos = player.getPosition(sprite);
 

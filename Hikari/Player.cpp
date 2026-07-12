@@ -353,12 +353,6 @@ void Player::handlePlayerState(PlayerStates& playerState, AttackInfo& AInfo) con
 }
 
 void Player::handleRows(DirectionInfo& DInfo, SpriteRows& rows) const {
-	// Déterminer la direction horizontale active en cas de conflit (A et D pressés en même temps)
-	/*bool isMovingLeft = heldState.leftHeld && (!heldState.rightHeld || DInfo.
-	lastHorizontal == Direction::LEFT);
-	bool isMovingRight = heldState.rightHeld && (!heldState.leftHeld || DInfo.
-		lastHorizontal == Direction::RIGHT);*/
-
 	// Les lignes pour l'état d'attaque sont différentes pour chaque direction
 	rows.attackingRow =
 		DInfo.direction == Direction::DOWN ? 1 :
