@@ -8,23 +8,30 @@
 //===============================
 // Inclusion des bibliothèques nécessaires
 //===============================
-#include "Player.h"
+// Librairies standard
 #include <iostream>
+#include <algorithm>
+#include <functional>
+#include <vector>
+#include <string>
+
+// Librairies SFML
+#include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics.hpp>
+#include <optional>
+#include <SFML/System/Clock.hpp>
+
+// Librairies du jeu
+#include "Player.h"
 #include "MapData.h"
 #include "MiniMap.h"
 #include "HealthBar.h"
 #include "Camera.h"
 #include "HitBox.h"
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/Graphics/Texture.hpp>
-#include <SFML/Graphics/Sprite.hpp>
-#include <algorithm>
-#include <functional>
-#include <vector>
-#include <SFML/Graphics.hpp>
-#include <optional>
-#include <SFML/System/Clock.hpp>
-#include <string>
+#include "Functions.h"
+#include "GameUI.h"
 
 // Structure pour stocker les éléments à rendre avec leur position Y
 struct RenderItem {
@@ -32,158 +39,19 @@ struct RenderItem {
 	std::function<void()> drawCall;
 };
 
-// Énumération pour les états du jeu
-enum class GameState {
-	Menu,
-	PauseMenu,
-	Playing
+struct MenuText {
+	// Vecteur pour les différents étiquettes du "Main Menu"
+	std::vector<std::string> mainMenuLabels = {
+		"PLAY", "SETTINGS", "CREDITS", "QUIT",
+	};
+
+	// Vecteur pour les différents étiquettes du "Pause Menu"
+	std::vector<std::string> PauseMenuLabels = {
+		"RESUME", "SETTINGS", "EXIT TO MAIN MENU",
+	};
 };
-
-// Structure pour stocker les éléments du menu
-struct MenuButton {
-	sf::RectangleShape background;
-	sf::Text text;
-
-	MenuButton(const sf::Font& font) : text(font) {}
-};
-
-//==============================
-// Fonction pour calculer une taille en fonction de la taille de la fenêtre
-// Paramètres:
-// - baseFontSize : la taille de la police d'origine
-// - baseWindowWidth : la largeur de la fenêtre d'origine
-// - baseWindowHeight : la hauteur de la fenêtre d'origine
-// - currentWindowWidth : la largeur de la fenêtre actuelle
-// - currentWindowHeight : la hauteur de la fenêtre actuelle
-// Description:
-// La taille est basé sur une ancienne taille de fenêtre et une taille précédente
-//==============================
-static int calculateSize(int baseSize, int baseWindowWidth, int baseWindowHeight, int currentWindowWidth, int currentWindowHeight) {
-	float PX = static_cast<float>(baseSize) / baseWindowWidth;	// Pourcentage de la position X de l'en-tête par rapport à la largeur de la fenêtre (960)
-	float PY = static_cast<float>(baseSize) / baseWindowHeight;	// Pourcentage de la position Y de l'en-tête par rapport à la hauteur de la fenêtre (576)
-
-	float sizeX = currentWindowWidth * PX;	// Taille de la position X de l'en-tête par rapport à la largeur de la fenêtre (960)
-	float sizeY = currentWindowHeight * PY;	// Taille de la position Y de l'en-tête par rapport à la hauteur de la fenêtre (576)
-
-	return int(((sizeX + sizeY) / 2));
-}
-
-//==============================
-// Fonction pour calculer une taille X en fonction de la taille de la fenêtre
-// Paramètres:
-// - baseFontSize : la taille de la police d'origine
-// - baseWindowWidth : la largeur de la fenêtre d'origine
-// - currentWindowWidth : la largeur de la fenêtre actuelle
-// Description:
-// La taille est basé sur une ancienne taille X de fenêtre et une taille X précédente
-//==============================
-static float calculateSizeX(float baseSize, int baseWindowWidth, int currentWindowWidth) {
-	float PX = baseSize / baseWindowWidth;	// Pourcentage de la position X de l'en-tête par rapport à la largeur de la fenêtre (960)
-	
-	float sizeX = currentWindowWidth * PX;	// Taille de la position X de l'en-tête par rapport à la largeur de la fenêtre (960)
-	
-	return sizeX;
-}
-
-//==============================
-// Fonction pour calculer une taille Y en fonction de la taille de la fenêtre
-// Paramètres:
-// - baseFontSize : la taille de la police d'origine
-// - baseWindowHeight : la hauteur de la fenêtre d'origine
-// - currentWindowHeight : la hauteur de la fenêtre actuelle
-// Description:
-// La taille est basé sur une ancienne taille Y de fenêtre et une taille Y précédente
-//==============================
-static float calculateSizeY(float baseSize, int baseWindowHeight, int currentWindowHeight) {
-	float PY = baseSize / baseWindowHeight;	// Pourcentage de la position Y de l'en-tête par rapport à la hauteur de la fenêtre (576)
-	
-	float sizeY = currentWindowHeight * PY;	// Taille de la position Y de l'en-tête par rapport à la hauteur de la fenêtre (576)
-	
-	return sizeY;
-}
-
-//==============================
-// Fonction pour recalculer la position des menus
-//==============================
-void recalculateLayout(
-	unsigned int width, unsigned int height,
-	sf::Font& mainMenuFont,
-	sf::Font& pauseMenuFont,
-	sf::Text& MMHeader, std::vector<MenuButton>& mainMenu,
-	sf::Text& pauseHeader, std::vector<MenuButton>& pauseMenu)
-{
-	// Update main header size and position
-	int MMHeaderSize = calculateSize(70, 960, 576, width, height);
-	MMHeader.setCharacterSize(MMHeaderSize);
-	float startXMain = width * 0.0208f;
-	float startYMain = height * 0.694f;
-	float MMHeaderOffsetY = calculateSizeY(50.f, 576, height);
-	MMHeader.setPosition({ (startXMain * 1.5f), MMHeaderOffsetY });
-
-	// Recalculate Main Menu buttons
-	float buttonWidthMain = width * 0.156f;
-	float buttonHeightMain = height * 0.052f;
-	float spacingMain = height * 0.0173f;
-	int mainButtonSize = calculateSize(14, 960, 576, width, height);
-	float buttonOffSetXMain = calculateSizeX(12.f, 960, width);
-	float buttonOffSetYMain = calculateSizeY(8.f, 576, height);
-
-	for (size_t i = 0; i < mainMenu.size(); ++i) {
-		mainMenu[i].background.setSize({ buttonWidthMain, buttonHeightMain });
-		mainMenu[i].background.setPosition({ startXMain, startYMain + i * (buttonHeightMain + spacingMain) });
-		mainMenu[i].text.setCharacterSize(mainButtonSize);
-		mainMenu[i].text.setPosition({ startXMain + buttonOffSetXMain, startYMain + i * (buttonHeightMain + spacingMain) + buttonOffSetYMain });
-	}
-
-	// Recalculate Pause Header size and position
-	int pauseHeaderSize = calculateSize(30, 960, 576, width, height);
-	pauseHeader.setCharacterSize(pauseHeaderSize);
-	float startX = width * 0.0208f;
-	float startY = height * 0.1736f;
-	float pauseHeaderOffsetY = calculateSizeY(30.f, 576, height);
-	pauseHeader.setPosition({ (startX * 1.75f), pauseHeaderOffsetY });
-
-	// Recalculate Pause Menu buttons
-	float buttonWidth = width * 0.3125f;
-	float buttonHeight = height * 0.0694f;
-	float spacing = height * 0.0173f;
-	int pauseButtonSize = calculateSize(14, 960, 576, width, height);
-	float buttonOffSetX = calculateSizeX(15.f, 960, width);
-	float buttonOffSetY = calculateSizeY(14.f, 576, height);
-
-	for (size_t i = 0; i < pauseMenu.size(); ++i) {
-		pauseMenu[i].background.setSize({ buttonWidth, buttonHeight });
-		pauseMenu[i].background.setPosition({ startX, startY + i * (buttonHeight + spacing) });
-		pauseMenu[i].text.setCharacterSize(pauseButtonSize);
-		pauseMenu[i].text.setPosition({ startX + buttonOffSetX, startY + i * (buttonHeight + spacing) + buttonOffSetY });
-	}
-}
-
-//===============================
-// Constantes de couleurs
-//===============================
-sf::Color WHITE_LESS(224, 224, 224);
-sf::Color SUBTLE_WHITE(255, 255, 255, 38);
-sf::Color SUBTLE_BLACK(0, 0, 0, 38);
-sf::Color WHITE_GRAY(86, 86, 86);
-
-//===============================
-// Constantes pour la taille des tuiles et les dimensions de la carte
-//===============================
-unsigned int windowWidth = 1440;
-unsigned int windowHeight = 864;
-const int TILE_SIZE = 32;
-
-//const int MAP_WIDTH = windowWidth / TILE_SIZE;   // Nombre de tuiles en largeur
-//const int MAP_HEIGHT = windowHeight / TILE_SIZE; // Nombre de tuiles en hauteur
-const int MAP_WIDTH = 30;   // Nombre de tuiles en largeur
-const int MAP_HEIGHT = 18;	// Nombre de tuiles en hauteur
-const int MAX_TILES = MAP_WIDTH * MAP_HEIGHT;     // Nombre total de tuiles dans la carte
-
-//===============================
-// Police principale du jeu
-//===============================
-const std::string PressStart2P = "Assets/PressStart2P-Regular.ttf";
+// Étiquette des différents menus
+MenuText menuLabels;
 
 int main()
 {
@@ -194,76 +62,83 @@ int main()
 	window.setFramerateLimit(60);
 	//window.setVerticalSyncEnabled(true);
 
+
+	// IMPORTANT
+	/*(startX * offsetMultiplierX);
+	(windowHeight * positionMultiplierY)*/
+
+
 	//===============================
-	// Création du menu principal
+	// Création du UI pour les menu différents
 	//===============================
-	// Police pour le texte du menu principal
-	sf::Font mainMenuFont;
-	if (!mainMenuFont.openFromFile(PressStart2P))
-	{
-		std::cerr << "Erreur lors du chargement de la police de texte" << std::endl;
-		return -1;
-	}
+	
+	//// Police pour le texte du menu principal
+	//sf::Font mainMenuFont;
+	//if (!mainMenuFont.openFromFile(PressStart2P))
+	//{
+	//	std::cerr << "Erreur lors du chargement de la police de texte" << std::endl;
+	//	return -1;
+	//}
 
-	// Vecteur pour les différents étiquettes du "Main Menu"
-	std::vector<std::string> menuLabels = {
-		"PLAY", "SETTINGS", "CREDITS", "QUIT",
-	};
+	//// Vecteur pour les différents étiquettes du "Main Menu"
+	//std::vector<std::string> menuLabels = {
+	//	"PLAY", "SETTINGS", "CREDITS", "QUIT",
+	//};
 
-	// Vecteur pour les différents bouton du "Main Menu"
-	std::vector<MenuButton> mainMenu;
-	int selectedMainIndex = 0;
+	//// Vecteur pour les différents bouton du "Main Menu"
+	//std::vector<MenuButton> mainMenu;
+	//int selectedMainIndex = 0;
 
-	float startXMain = windowWidth * 0.0208f;
-	float startYMain = windowHeight * 0.694f;
-	float buttonWidthMain = windowWidth * 0.156f;
-	float buttonHeightMain = windowHeight * 0.052f;
-	float spacingMain = windowHeight * 0.0173f;
+	//float startXMain = windowWidth * 0.0208f;
+	//float startYMain = windowHeight * 0.694f;
+	//float buttonWidthMain = windowWidth * 0.156f;
+	//float buttonHeightMain = windowHeight * 0.052f;
+	//float spacingMain = windowHeight * 0.0173f;
 
-	// Taille de la police de l'en-tête
-	int MMHeaderSize = calculateSize(70, 960, 576, windowWidth, windowHeight);	// Taille de la police de l'en-tête
-	// En-tête "MAIN MENU"
-	sf::Text MMHeader(mainMenuFont, "HIKARI", MMHeaderSize);
-	MMHeader.setFillColor(sf::Color::White);
+	//// Taille de la police de l'en-tête
+	//int MMHeaderSize = calculateSize(70, 960, 576, windowWidth, windowHeight);	// Taille de la police de l'en-tête
+	//// En-tête "MAIN MENU"
+	//sf::Text MMHeader(mainMenuFont, "HIKARI", MMHeaderSize);
+	//MMHeader.setFillColor(sf::Color::White);
 
-	// Positionnement Y de l'en-tête du menu principal
-	float MMHeaderOffsetY = calculateSizeY(50.f, 576, windowHeight);	
-	MMHeader.setPosition({ (startXMain * 1.5f), MMHeaderOffsetY });
+	//// Positionnement Y de l'en-tête du menu principal
+	//float MMHeaderOffsetY = calculateSizeY(50.f, 576, windowHeight);	
+	//MMHeader.setPosition({ (startXMain * 1.5f), MMHeaderOffsetY });
 
-	// Génération les boutons du menu principal
-	for (size_t i = 0; i < menuLabels.size(); ++i) {
-		MenuButton mainButton(mainMenuFont);
+	//// Génération les boutons du menu principal
+	//for (size_t i = 0; i < menuLabels.size(); ++i) {
+	//	MenuButton mainButton(mainMenuFont);
 
-		// Configuration de l'arrière du bouton
-		mainButton.background.setSize({ buttonWidthMain, buttonHeightMain });
-		mainButton.background.setPosition({ startXMain, startYMain + i * (buttonHeightMain + spacingMain) });
+	//	// Configuration de l'arrière du bouton
+	//	mainButton.background.setSize({ buttonWidthMain, buttonHeightMain });
+	//	mainButton.background.setPosition({ startXMain, startYMain + i * (buttonHeightMain + spacingMain) });
 
-		// Remplissage du texte des boutons
-		if (i == 0) {
-			mainButton.background.setFillColor(sf::Color::Transparent);
-		}
-		else {
-			mainButton.background.setFillColor(sf::Color::Transparent);
-		}
+	//	// Remplissage du texte des boutons
+	//	if (i == 0) {
+	//		mainButton.background.setFillColor(sf::Color::Transparent);
+	//	}
+	//	else {
+	//		mainButton.background.setFillColor(sf::Color::Transparent);
+	//	}
 
-		// Taille de la police du texte à l'intérieur du bouton
-		int mainButtonSize = calculateSize(14, 960, 576, windowWidth, windowHeight);	// Taille de la police de l'en-tête
-		// Configuration du texte à l'intérieur du bouton
-		mainButton.text = sf::Text(mainMenuFont, menuLabels[i], mainButtonSize);
-		if (i == 0) {
-			mainButton.text.setFillColor(sf::Color::White);
-		}
-		else {
-			mainButton.text.setFillColor(sf::Color::Black);
-		}
+	//	// Taille de la police du texte à l'intérieur du bouton
+	//	int mainButtonSize = calculateSize(14, 960, 576, windowWidth, windowHeight);	// Taille de la police de l'en-tête
+	//	// Configuration du texte à l'intérieur du bouton
+	//	mainButton.text = sf::Text(mainMenuFont, menuLabels[i], mainButtonSize);
+	//	if (i == 0) {
+	//		mainButton.text.setFillColor(sf::Color::White);
+	//	}
+	//	else {
+	//		mainButton.text.setFillColor(sf::Color::Black);
+	//	}
 
-		float buttonOffSetXMain = calculateSizeX(12.f, 960, windowWidth);
-		float buttonOffSetYMain = calculateSizeY(8.f, 576, windowHeight);
-		// Centrer le texte verticalement à l'intérieur du rectangle
-		mainButton.text.setPosition({ startXMain + buttonOffSetXMain, startYMain + i * (buttonHeightMain + spacingMain) + buttonOffSetYMain });
+	//	float buttonOffSetXMain = calculateSizeX(12.f, 960, windowWidth);
+	//	float buttonOffSetYMain = calculateSizeY(8.f, 576, windowHeight);
+	//	// Centrer le texte verticalement à l'intérieur du rectangle
+	//	mainButton.text.setPosition({ startXMain + buttonOffSetXMain, startYMain + i * (buttonHeightMain + spacingMain) + buttonOffSetYMain });
 
-		mainMenu.push_back(mainButton);
-	}
+	//	mainMenu.push_back(mainButton);
+	//}
 	
 	//===============================
 	// Création du menu de pause
@@ -437,64 +312,64 @@ int main()
 			switch (currentGameState) {
 			case GameState::Menu:
 				// Gérer les événements du menu principal ici
-				// Mouse Hover Logic
-				if (const auto* mouseMoved = event->getIf<sf::Event::MouseMoved>()) {
-					sf::Vector2f mousePos = window.mapPixelToCoords(mouseMoved->position);
+				//// Mouse Hover Logic
+				//if (const auto* mouseMoved = event->getIf<sf::Event::MouseMoved>()) {
+				//	sf::Vector2f mousePos = window.mapPixelToCoords(mouseMoved->position);
 
-					for (size_t i = 0; i < mainMenu.size(); ++i) {
-						if (mainMenu[i].background.getGlobalBounds().contains(mousePos)) {
-							// Reset old selected button to default look
-							mainMenu[selectedMainIndex].background.setFillColor(sf::Color::Transparent);
-							mainMenu[selectedMainIndex].text.setFillColor(sf::Color::Black);
+				//	for (size_t i = 0; i < mainMenu.size(); ++i) {
+				//		if (mainMenu[i].background.getGlobalBounds().contains(mousePos)) {
+				//			// Reset old selected button to default look
+				//			mainMenu[selectedMainIndex].background.setFillColor(sf::Color::Transparent);
+				//			mainMenu[selectedMainIndex].text.setFillColor(sf::Color::Black);
 
-							// Highlight new hovered button
-							selectedMainIndex = i;
+				//			// Highlight new hovered button
+				//			selectedMainIndex = i;
 
-							// Put the new hovered button to highlighted look
-							mainMenu[selectedMainIndex].background.setFillColor(sf::Color::Transparent);
-							mainMenu[selectedMainIndex].text.setFillColor(sf::Color::White);
-						}
-					}
-				}
+				//			// Put the new hovered button to highlighted look
+				//			mainMenu[selectedMainIndex].background.setFillColor(sf::Color::Transparent);
+				//			mainMenu[selectedMainIndex].text.setFillColor(sf::Color::White);
+				//		}
+				//	}
+				//}
 
-				// Mouse Click Logic
-				if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>()) {
-					if (mousePressed->button == sf::Mouse::Button::Left) {
-						sf::Vector2f mousePos = window.mapPixelToCoords(mousePressed->position);
+				//// Mouse Click Logic
+				//if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>()) {
+				//	if (mousePressed->button == sf::Mouse::Button::Left) {
+				//		sf::Vector2f mousePos = window.mapPixelToCoords(mousePressed->position);
 
-						for (size_t i = 0; i < mainMenu.size(); ++i) {
-							if (mainMenu[i].background.getGlobalBounds().contains(mousePos)) {
-								if (i == 0) currentGameState = GameState::Playing; // Resume
-								else if (i == 1) {
-									isFullscreen = !isFullscreen;
-									if (isFullscreen) {
-										window.create(sf::VideoMode::getDesktopMode(), "Hikari",
-											sf::Style::Default, sf::State::Fullscreen);
-									}
-									else {
-										window.create(sf::VideoMode({ 1440, 864 }), "Hikari",
-											sf::Style::Default, sf::State::Windowed);
-									}
-									window.setFramerateLimit(60);
+				//		for (size_t i = 0; i < mainMenu.size(); ++i) {
+				//			if (mainMenu[i].background.getGlobalBounds().contains(mousePos)) {
+				//				if (i == 0) currentGameState = GameState::Playing; // Resume
+				//				else if (i == 1) {
+				//					isFullscreen = !isFullscreen;
+				//					if (isFullscreen) {
+				//						window.create(sf::VideoMode::getDesktopMode(), "Hikari",
+				//							sf::Style::Default, sf::State::Fullscreen);
+				//					}
+				//					else {
+				//						window.create(sf::VideoMode({ 1440, 864 }), "Hikari",
+				//							sf::Style::Default, sf::State::Windowed);
+				//					}
+				//					window.setFramerateLimit(60);
 
-									// Retrieve the actual new window dimensions
-									windowWidth = window.getSize().x;
-									windowHeight = window.getSize().y;
+				//					// Retrieve the actual new window dimensions
+				//					windowWidth = window.getSize().x;
+				//					windowHeight = window.getSize().y;
 
-									// Update UI Layout positions and sizes
-									recalculateLayout(windowWidth, windowHeight, mainMenuFont,
-										pauseMenuFont, MMHeader, mainMenu, pauseHeader, pauseMenu);
+				//					// Update UI Layout positions and sizes
+				//					recalculateLayout(windowWidth, windowHeight, mainMenuFont,
+				//						pauseMenuFont, MMHeader, mainMenu, pauseHeader, pauseMenu);
 
-									// Update Camera and Minimap dimensions
-									playerCamera.updateSize(windowWidth, windowHeight, 0.7f);
-									miniMap.updateWindowSize(windowWidth, windowHeight);
-								}
-								else if (i == 2) ;
-								else if (i == 3) window.close();
-							}
-						}
-					}
-				}
+				//					// Update Camera and Minimap dimensions
+				//					playerCamera.updateSize(windowWidth, windowHeight, 0.7f);
+				//					miniMap.updateWindowSize(windowWidth, windowHeight);
+				//				}
+				//				else if (i == 2) ;
+				//				else if (i == 3) window.close();
+				//			}
+				//		}
+				//	}
+				//}
 
 				// Keyboard Logic (Navigate Pause Menu)
 				if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {

@@ -136,17 +136,20 @@
   <ItemGroup>
     <ClCompile Include="Animations.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Functions.cpp" />
     <ClCompile Include="HealthBar.cpp" />
     <ClCompile Include="HitBox.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="MapData.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="GameUI.cpp" />
     <ClCompile Include="MiniMap.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="TileMap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animations.h" />
+    <ClInclude Include="Functions.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="GameHeaders.h" />
@@ -154,6 +157,7 @@
     <ClInclude Include="HitBox.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="MapData.h" />
+    <ClInclude Include="GameUI.h" />
     <ClInclude Include="MiniMap.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerData.h" />

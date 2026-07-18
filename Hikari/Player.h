@@ -22,7 +22,9 @@
 //===============================
 // Inclusion des bibliothèques
 //===============================
-#include "GameHeaders.h"
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+
 #include "PlayerData.h"
 #include "Animations.h"
 

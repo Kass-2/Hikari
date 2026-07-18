@@ -12,18 +12,14 @@
 #include <algorithm>
 #include <iostream>
 
-HealthBar::HealthBar(const std::string& containerPath, int
-    containerWidth, int containerHeight, int containerFrames,
-    const std::string& firePath, int fireWidth, int
-    fireHeight, int fireFrames,
-    float frameTime)
-    : containerSprite(containerTexture),
-    fireSprite(fireTexture),
-    cW(containerWidth), cH(containerHeight),
-    containerTotalFrames(containerFrames), containerCurrentFrame(0),
-    fW(fireWidth), fH(fireHeight), fireTotalFrames(fireFrames),
-    fireCurrentFrame(0),
-    frameTime(frameTime), animationTimer(0.f)
+HealthBar::HealthBar(const std::string& containerPath, 
+    int containerWidth, int containerHeight, int containerFrames,
+    const std::string& firePath, int fireWidth, int fireHeight, 
+    int fireFrames, float frameTime)
+    : containerSprite(containerTexture), fireSprite(fireTexture),
+    cW(containerWidth), cH(containerHeight), containerTotalFrames(containerFrames), 
+    containerCurrentFrame(0), fW(fireWidth), fH(fireHeight), fireTotalFrames(fireFrames),
+    fireCurrentFrame(0), frameTime(frameTime), animationTimer(0.f)
 {
     // Load container spritesheet
     if (!containerTexture.loadFromFile(containerPath)) {

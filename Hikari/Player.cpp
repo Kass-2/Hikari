@@ -8,6 +8,9 @@
 //===============================
 // Inclusion des bibliothèques nécessaires
 //===============================
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+
 #include "Player.h"
 
 Player::Player(sf::Texture &texture, sf::Sprite &sprite, const std::string& tf, int frameWidth, int frameHeight)
