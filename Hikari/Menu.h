@@ -1,6 +1,6 @@
 //===============================
-// Fichier : GameUI.h
-// Description : Implémentation de la classe GameUI pour gérer l'interface de jeu (UI and UX)
+// Fichier : Menu.h
+// Description : Implémentation de la classe Menu pour gérer l'interface de jeu (UI and UX)
 // Auteur : Aboubacar Sanogo
 // Version : 1.0
 //===============================
@@ -36,10 +36,16 @@ enum class MenuIndex {
 	PAUSE,
 };
 
+// Déclaration anticipée de la classe Menu
+class Menu;
+
 // Structure pour stocker les éléments du menu
 struct MenuButton {
 	sf::RectangleShape background;
 	sf::Text text;
+
+	Menu* subMenu = nullptr;
+	GameState
 
 	MenuButton(const sf::Font& font) : text(font) {}
 };
@@ -69,12 +75,12 @@ sf::Color SUBTLE_WHITE(255, 255, 255, 38);
 sf::Color SUBTLE_BLACK(0, 0, 0, 38);
 sf::Color WHITE_GRAY(86, 86, 86);
 
-class GameUI {
+class Menu {
 public:
 	//===============================
 	// Constructeur pour l'interface
 	//===============================
-	GameUI(std::string fontPath, std::vector<std::string> menuLabels, 
+	Menu(std::string fontPath, std::vector<std::string> menuLabels, 
 		std::string name, int size, unsigned int wWidth, unsigned wHeight);
 
 	//==============================
@@ -95,7 +101,7 @@ public:
 	//==============================
 	// Fonction pour repositionner les menus
 	//==============================
-	//void resetMultiUIPosition(std::vector<GameUI&> menus, unsigned int newWindowWidth, unsigned int newWindowHeight);
+	//void resetMultiUIPosition(std::vector<Menu&> menus, unsigned int newWindowWidth, unsigned int newWindowHeight);
 
 	//==============================
 	// Fonction pour repositionner le menu
